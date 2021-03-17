@@ -151,15 +151,18 @@ func (c *DanmuCenter) updateRoom(monitorNumber int) error {
 }
 
 func (c *DanmuCenter) tickerTask() {
-	ticker := time.NewTicker(time.Minute)
+	tickerCleanDanmu := time.NewTicker(time.Minute)
+	tickerUpdateRoom := time.NewTicker(time.Minute)
 	for {
 		select {
 		case <-context.Background().Done():
-			ticker.Stop()
+			tickerCleanDanmu.Stop()
+			tickerUpdateRoom.Stop()
 			return
-		case <-ticker.C:
-			go c.updateRoom(c.config.MonitorNumber)
+		case <-tickerCleanDanmu.C:
 			go c.cleanDanmuDB(c.config.TimeRange)
+		case <-tickerUpdateRoom.C:
+			go c.updateRoom(c.config.MonitorNumber)
 		}
 	}
 

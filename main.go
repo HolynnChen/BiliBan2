@@ -8,7 +8,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	//西能调优
+	//性能调优
 	"net/http"
 	_ "net/http/pprof"
 )
