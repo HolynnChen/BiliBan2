@@ -1,6 +1,11 @@
 package DanmuCenter
 
-import "time"
+import (
+	"log"
+	"time"
+
+	"github.com/TheFutureIsOurs/ahocorasick"
+)
 
 //封禁高速发言且整体连续(三条)相似度大于similarity的账户
 type highSimilarityAndSpeedFilter struct {
@@ -86,4 +91,20 @@ func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float
 		writeMark:     0,
 		nowSize:       0,
 	}
+}
+
+type keyWordFilter struct {
+	*ahocorasick.Ac
+}
+
+func (filter *keyWordFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
+	return filter.MultiPatternHit([]rune(danmu.Content)), "关键词匹配"
+}
+
+func NewKeyWordFilter(keywords []string) *keyWordFilter {
+	ac, err := ahocorasick.Build(keywords)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &keyWordFilter{ac}
 }

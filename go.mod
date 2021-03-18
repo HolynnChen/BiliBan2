@@ -3,6 +3,7 @@ module github.com/Holynnchen/BiliBan2
 go 1.16
 
 require (
+	github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/holynnchen/bililive v0.0.0-20210317183619-7ac0dabc3f33
 	github.com/json-iterator/go v1.1.10

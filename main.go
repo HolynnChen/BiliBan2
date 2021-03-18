@@ -36,6 +36,7 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter(
+			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}), //关键词匹配过滤
 			// DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
 			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕
 			DanmuCenter.NewLenFilter(10, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
