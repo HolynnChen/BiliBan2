@@ -52,7 +52,7 @@ type banWindowData struct {
 
 func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
 	content := ReplaceSimilarAndNumberRune(danmu.Content)
-	for i := 1; i < filter.nowSize; i++ {
+	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
 			break
@@ -66,7 +66,7 @@ func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, s
 
 func (filter *banWindowFilter) Ban(banData *BanData) {
 	content := ReplaceSimilarAndNumberRune(banData.Content)
-	for i := 1; i < filter.nowSize; i++ {
+	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
 			break
