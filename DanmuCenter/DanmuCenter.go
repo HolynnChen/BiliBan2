@@ -118,7 +118,9 @@ func (c *DanmuCenter) cleanDanmuDB(timeRange int64) {
 		}
 		return true
 	})
-	log.Printf("定时清理弹幕DB：移除%d个过期key，当前%d个key\n", count, all)
+	if !c.config.Silent {
+		log.Printf("定时清理弹幕DB：移除%d个过期key，当前%d个key\n", count, all)
+	}
 }
 
 func (c *DanmuCenter) updateRoom(monitorNumber int) error {
@@ -143,7 +145,9 @@ func (c *DanmuCenter) updateRoom(monitorNumber int) error {
 			removeList = append(removeList, id)
 		}
 	}
-	log.Printf("同步热门榜：移除%d个房间(%v)，新增%d个房间(%v)\n", len(removeList), removeList, len(addList), addList)
+	if !c.config.Silent && (len(removeList) > 0 || len(addList) > 0) {
+		log.Printf("同步热门榜：移除%d个房间(%v)，新增%d个房间(%v)\n", len(removeList), removeList, len(addList), addList)
+	}
 	c.Live.Remove(removeList...)
 	c.Live.Join(addList...)
 	c.roomIDs = newRoomIDsMap

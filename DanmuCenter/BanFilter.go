@@ -1,5 +1,7 @@
 package DanmuCenter
 
+import "time"
+
 //封禁高速发言且整体连续(三条)相似度大于similarity的账户
 type highSimilarityAndSpeedFilter struct {
 	similarity float32
@@ -30,17 +32,27 @@ func NewHighSimilarityAndSpeedFilter(similarity float32, startCheck int) *highSi
 }
 
 type banWindowFilter struct {
-	banWindow     []string
+	banWindow     []*banWindowData
 	banWindowSize int
+	banWindowTime int64
 	writeMark     int
 	nowSize       int
 	similarity    float32
 }
 
+type banWindowData struct {
+	banString string
+	banTime   int64
+}
+
 func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
 	content := ReplaceSimilarAndNumberRune(danmu.Content)
 	for i := 1; i < filter.nowSize; i++ {
-		if GetSimilarity(filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize], content) > filter.similarity {
+		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
+		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
+			break
+		}
+		if GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			return true, "匹配封禁窗口"
 		}
 	}
@@ -50,21 +62,26 @@ func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, s
 func (filter *banWindowFilter) Ban(banData *BanData) {
 	content := ReplaceSimilarAndNumberRune(banData.Content)
 	for i := 1; i < filter.nowSize; i++ {
-		if GetSimilarity(filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize], content) > filter.similarity {
+		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
+		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
+			break
+		}
+		if GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			return
 		}
 	}
-	filter.banWindow[filter.writeMark] = content
+	filter.banWindow[filter.writeMark] = &banWindowData{banString: content, banTime: time.Now().Unix()}
 	filter.writeMark = (filter.writeMark + 1) % filter.banWindowSize
 	if filter.nowSize < filter.banWindowSize {
 		filter.nowSize++
 	}
 }
 
-func NewBanWindowFilter(banWindowSize int, similarity float32) *banWindowFilter {
+func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32) *banWindowFilter {
 	return &banWindowFilter{
-		banWindow:     make([]string, banWindowSize, banWindowSize),
+		banWindow:     make([]*banWindowData, banWindowSize, banWindowSize),
 		banWindowSize: banWindowSize,
+		banWindowTime: banWindowTime,
 		similarity:    similarity,
 		writeMark:     0,
 		nowSize:       0,

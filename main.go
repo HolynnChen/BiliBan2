@@ -25,19 +25,20 @@ func main() {
 	}
 	db.AutoMigrate(&SaveData{})
 
-	banWindowFilter := DanmuCenter.NewBanWindowFilter(100, 0.75)     //创建容量为100，相似度要求为0.75的封禁窗口
-	banProcess := &CustomBanProcess{db: db, filter: banWindowFilter} //创建自定义封禁处理结构体
-	banProcess.Restore(100)                                          //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banWindowFilter := DanmuCenter.NewBanWindowFilter(100, 3600, 0.75) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
+	banProcess := &CustomBanProcess{db: db, filter: banWindowFilter}   //创建自定义封禁处理结构体
+	banProcess.Restore(100)                                            //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      10,
 		MonitorNumber:  30,
 		SpecialFocusOn: []int{1370218}, //1237390
+		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter(
-			DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
-			DanmuCenter.NewHaveBeenBanFilter(),                                          //过滤掉已被Ban的弹幕
-			DanmuCenter.NewLenFilter(9, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
+			// DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
+			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕
+			DanmuCenter.NewLenFilter(10, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
 		),
 		DanmuCenter.SetSafeFilter(
 			DanmuCenter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕

@@ -10,8 +10,11 @@ func TestGetTopRoom(t *testing.T) {
 }
 
 func TestTry(t *testing.T) {
-	fmt.Println(GetSimilarity(ReplaceSimilarAndNumberRune("片姐姐就是我，照片！"), ReplaceSimilarAndNumberRune("上船解锁舰长群60多样好听好看的浮力，点播免费，还可以加学姐私人QQ，")))
-	fmt.Println(GetSimilarity(ReplaceSimilarAndNumberRune("  勉的钱输 Β t y  。Pw"), ReplaceSimilarAndNumberRune("上船解锁舰长群60多样好听好看的浮力，点播免费，还可以加学姐私人QQ，")))
+	text1 := ReplaceSimilarAndNumberRune("y22c１▪∁ＯM→全是倮躰的校花们哟e")
+	text2 := ReplaceSimilarAndNumberRune("搜<y9h2.∁n>带好纸巾去鲁个痛筷e")
+	fmt.Println(text1)
+	fmt.Println(text2)
+	fmt.Println(GetSimilarity(text1, text2))
 }
 
 func TestMap(t *testing.T) {

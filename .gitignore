@@ -1,3 +1,5 @@
 /build
 /gorm.db
 .DS_Store
+.gitignore
+/prepare

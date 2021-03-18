@@ -36,6 +36,7 @@ type DanmuCenterConfig struct {
 	TimeRange      int64 // 弹幕储存时间范围，秒级
 	MonitorNumber  int   // 热门榜前几
 	SpecialFocusOn []int // 特别关注的直播间
+	Silent         bool  // 安静模式
 }
 
 type DanmuCenterOption func(center *DanmuCenter)
