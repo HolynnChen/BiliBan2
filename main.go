@@ -35,16 +35,16 @@ func main() {
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
-		DanmuCenter.SetSaveFilter(
+		DanmuCenter.SetSaveFilter( //是否入库检测
 			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}), //关键词匹配过滤
 			// DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
 			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕
 			DanmuCenter.NewLenFilter(10, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
 		),
-		DanmuCenter.SetSafeFilter(
+		DanmuCenter.SetSafeFilter( //是否正常弹幕
 			DanmuCenter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
 		),
-		DanmuCenter.SetBanFilter(
+		DanmuCenter.SetBanFilter( //是否异常弹幕
 			banWindowFilter, //与封禁窗口比较
 			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
 		),
