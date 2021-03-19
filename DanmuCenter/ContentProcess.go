@@ -40,10 +40,16 @@ func ReplaceSimilarAndNumberRune(rawData string) string {
 }
 
 func CompressRepeatGroup(repeatGroupMinLen int) func(string) string {
-	replaceGroup := regexp2.MustCompile(`(.{`+strconv.Itoa(repeatGroupMinLen)+`,}?)\1+`, 0)
+	replaceGroup := regexp2.MustCompile(`(.{`+strconv.Itoa(repeatGroupMinLen)+`,})(?=.*\1)+`, 0)
 	return func(s string) string {
-		if result, err := replaceGroup.Replace(s, "$1", -1, -1); err == nil {
-			return result
+		m, _ := replaceGroup.FindStringMatch(s)
+		for m != nil {
+			word := m.Capture.String()
+			split := strings.Split(s, word)
+			if len(split) > 1 {
+				s = split[0] + word + strings.Join(split[1:], "")
+			}
+			m, _ = replaceGroup.FindNextMatch(m)
 		}
 		return s
 	}

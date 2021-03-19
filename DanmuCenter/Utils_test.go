@@ -10,11 +10,8 @@ func TestGetTopRoom(t *testing.T) {
 }
 
 func TestTry(t *testing.T) {
-	text1 := ReplaceSimilarAndNumberRune("y22c１▪∁ＯM→全是倮躰的校花们哟e")
-	text2 := ReplaceSimilarAndNumberRune("搜<y9h2.∁n>带好纸巾去鲁个痛筷e")
-	fmt.Println(text1)
-	fmt.Println(text2)
-	fmt.Println(GetSimilarity(text1, text2))
+	s := "我可以吗? 喜欢你 我可以吗! 喜欢你"
+	fmt.Println(CompressRepeatGroup(3)(s))
 }
 
 func TestMap(t *testing.T) {
