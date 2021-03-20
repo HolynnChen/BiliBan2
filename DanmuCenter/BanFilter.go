@@ -58,6 +58,7 @@ func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, s
 			break
 		}
 		if GetSimilarity(banWindowData.banString, content) > filter.similarity {
+			banWindowData.banTime = time.Now().Unix() //时间续期
 			return true, "匹配封禁窗口"
 		}
 	}
