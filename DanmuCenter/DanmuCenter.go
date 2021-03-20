@@ -2,6 +2,7 @@ package DanmuCenter
 
 import (
 	"context"
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -126,7 +127,18 @@ func (c *DanmuCenter) cleanDanmuDB(timeRange int64) {
 }
 
 func (c *DanmuCenter) updateRoom(monitorNumber int) error {
-	newRoomIDs, err := GetTopRoom(monitorNumber)
+	var (
+		newRoomIDs []int
+		err        error
+	)
+	switch c.config.RankType {
+	case 0:
+		newRoomIDs, err = GetTopRoom(monitorNumber)
+	case 1:
+		newRoomIDs, err = GetTop50HotRoom()
+	default:
+		err = errors.New("no such rank type ")
+	}
 	if err != nil {
 		return err
 	}

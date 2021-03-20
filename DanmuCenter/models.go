@@ -36,6 +36,7 @@ type DanmuCenterConfig struct {
 	TimeRange      int64 // 弹幕储存时间范围，秒级
 	MonitorNumber  int   // 热门榜前几
 	SpecialFocusOn []int // 特别关注的直播间
+	RankType       int   // 获取直播间的途径
 	Silent         bool  // 安静模式
 }
 
@@ -45,7 +46,7 @@ type Danmu struct {
 	UserID     int64  // 用户uid
 	RoomID     int    // 房间id
 	UserName   string // 用户名
-	UserLevel  int    //用户等级
+	UserLevel  int    // 用户等级
 	MedalLevel int    // 勋章等级
 	Content    string // 弹幕内容
 	Timestamp  int64  // 时间戳

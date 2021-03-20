@@ -9,8 +9,12 @@ func TestGetTopRoom(t *testing.T) {
 	fmt.Println(GetTopRoom(100))
 }
 
+func TestGetHotRoom(t *testing.T) {
+	fmt.Println(GetTop50HotRoom())
+}
+
 func TestTry(t *testing.T) {
-	s := "我可以吗? 喜欢你 我可以吗! 喜欢你"
+	s := `\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/`
 	fmt.Println(CompressRepeatGroup(3)(s))
 }
 

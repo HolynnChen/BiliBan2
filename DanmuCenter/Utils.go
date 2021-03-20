@@ -44,6 +44,41 @@ func GetTopRoom(max int) ([]int, error) {
 	return roomIDs, nil
 }
 
+type HotRoomResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	TTL     int    `json:"ttl"`
+	Data    Data2  `json:"data"`
+}
+type Data2 struct {
+	List []List `json:"list"`
+}
+type List struct {
+	Uname  string `json:"uname"`
+	RoomID int    `json:"room_id"`
+}
+
+func GetTop50HotRoom() ([]int, error) {
+	resp, err := http.Get("https://api.live.bilibili.com/xlive/general-interface/v1/rank/getHotRank?room_id=1&ruid=1&area_id=0&page_size=50&source=1")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var result = new(HotRoomResponse)
+	if err := json.Unmarshal(body, result); err != nil {
+		return nil, err
+	}
+	var roomIDs []int
+	for _, room := range result.Data.List {
+		roomIDs = append(roomIDs, room.RoomID)
+	}
+	return roomIDs, nil
+}
+
 // get the number in a ant not in b
 func DiffrenceIntArray(a []int, b []int) []int {
 	mark := map[int]Empty{}
