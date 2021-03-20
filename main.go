@@ -36,6 +36,8 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
+			DanmuCenter.NewUserLevelFilter(15),                       // 过滤掉用户等级>=15的
+			DanmuCenter.NewFansMedalFilter(10),                       // 过滤掉粉丝勋章等级>=10的
 			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}), //关键词匹配过滤
 			// DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
 			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕

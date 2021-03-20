@@ -38,11 +38,13 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 
 func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	danmu := &Danmu{
-		RoomID:    roomID,
-		UserID:    msg.UserID,
-		UserName:  msg.UserName,
-		Content:   msg.Content,
-		Timestamp: msg.Timestamp,
+		RoomID:     roomID,
+		UserID:     msg.UserID,
+		UserName:   msg.UserName,
+		UserLevel:  msg.UserLevel,
+		MedalLevel: msg.MedalLevel,
+		Content:    msg.Content,
+		Timestamp:  msg.Timestamp,
 	}
 	//是否入库检测
 	for _, filter := range c.saveFilter {

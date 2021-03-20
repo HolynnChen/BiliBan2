@@ -38,10 +38,7 @@ func (filter *lenFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string)
 	if filter.repeatGroupCompress != nil {
 		content = filter.repeatGroupCompress(content)
 	}
-	if utf8.RuneCountInString(content) < filter.lenTarget {
-		return true, ""
-	}
-	return false, ""
+	return utf8.RuneCountInString(content) < filter.lenTarget, ""
 }
 
 func NewLenFilter(lenTarget int, options ...lenFilterOption) *lenFilter {
@@ -64,10 +61,8 @@ func SetLenFilterCompressRepeatGroup(minLen int) lenFilterOption {
 type haveBeenBanFilter struct{}
 
 func (filter *haveBeenBanFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
-	if _, ok := center.BanDB.Load(danmu.UserID); ok {
-		return true, ""
-	}
-	return false, ""
+	_, ok := center.BanDB.Load(danmu.UserID)
+	return ok, ""
 }
 
 // Filter -> haveBeenBan
@@ -81,15 +76,44 @@ type uidFilter struct {
 }
 
 func (filter *uidFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
-	if danmu.UserID < filter.uidTarget {
-		return true, ""
-	}
-	return false, ""
+	return danmu.UserID < filter.uidTarget, ""
 }
 
 // Filter-> uid<uidTarget
 func NewUIDFilter(uidTarget int64) *uidFilter {
 	return &uidFilter{
 		uidTarget: uidTarget,
+	}
+}
+
+// userLevel >= levelTarget视为正常
+type levelFilter struct {
+	levelTarget int
+}
+
+func (filter *levelFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
+	return danmu.UserLevel >= filter.levelTarget, ""
+}
+
+// Filter-> userLever >= levelTarget
+func NewUserLevelFilter(levelTarget int) *levelFilter {
+	return &levelFilter{
+		levelTarget: levelTarget,
+	}
+}
+
+// fansMedalLever >=levelTarget视为正常
+type fansMedalFilter struct {
+	levelTarget int
+}
+
+func (filter *fansMedalFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
+	return danmu.MedalLevel >= filter.levelTarget, ""
+}
+
+// Filter-> fansMedalLevel >= leverTarget
+func NewFansMedalFilter(levelTarget int) *fansMedalFilter {
+	return &fansMedalFilter{
+		levelTarget: levelTarget,
 	}
 }

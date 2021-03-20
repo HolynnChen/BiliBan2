@@ -42,11 +42,13 @@ type DanmuCenterConfig struct {
 type DanmuCenterOption func(center *DanmuCenter)
 
 type Danmu struct {
-	UserID    int64  // 用户uid
-	RoomID    int    // 房间id
-	UserName  string // 用户名
-	Content   string // 弹幕内容
-	Timestamp int64  // 时间戳
+	UserID     int64  // 用户uid
+	RoomID     int    // 房间id
+	UserName   string // 用户名
+	UserLevel  int    //用户等级
+	MedalLevel int    // 勋章等级
+	Content    string // 弹幕内容
+	Timestamp  int64  // 时间戳
 }
 
 type BanData struct {
