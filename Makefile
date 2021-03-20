@@ -9,7 +9,7 @@ run:
 	@./build/main
 
 build:
-    @echo "Building BiliBan..."
+	@echo "Building BiliBan..."
 	@mkdir -p ./build
 	@go clean
 	@rm -f ./build/main
