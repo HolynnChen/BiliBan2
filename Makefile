@@ -8,7 +8,7 @@ run:
 	@echo "Finish! Ready to start server..."
 	@./build/main
 
-build:
+release:
 	@echo "Building BiliBan..."
 	@mkdir -p ./build
 	@go clean
