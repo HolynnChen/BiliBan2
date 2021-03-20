@@ -16,7 +16,7 @@ import (
 func main() {
 	//性能调优
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
 	}()
 
 	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
@@ -30,16 +30,15 @@ func main() {
 	banProcess.Restore(100)                                            //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
-		TimeRange:      10,
-		MonitorNumber:  30,
+		TimeRange:      30,
+		MonitorNumber:  50,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
-			DanmuCenter.NewUserLevelFilter(15),                       // 过滤掉用户等级>=15的
-			DanmuCenter.NewFansMedalFilter(10),                       // 过滤掉粉丝勋章等级>=10的
-			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}), //关键词匹配过滤
-			// DanmuCenter.NewUIDFilter(400000000),                                         //过滤uid小于400000000的弹幕
+			DanmuCenter.NewUserLevelFilter(15),                                           // 过滤掉用户等级>=15的
+			DanmuCenter.NewFansMedalFilter(10),                                           // 过滤掉粉丝勋章等级>=10的
+			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),                     // 关键词匹配过滤
 			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕
 			DanmuCenter.NewLenFilter(10, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
 		),
