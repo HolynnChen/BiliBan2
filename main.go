@@ -100,7 +100,7 @@ type SyncData struct {
 	Reason    string `json:"Reason"`
 }
 
-const syncUrl = "https://api.expublicsite.com:27777/bilibili/coopBlock/block"
+const syncUrl = "https://api.expublicsite.com:27777/bilibili/coopBlock/v1/block"
 
 func syncBan(banData *DanmuCenter.BanData) {
 	jsonData, _ := jsoniter.Marshal(SyncData{
