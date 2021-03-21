@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"time"
@@ -14,15 +15,9 @@ import (
 
 	//性能调优
 	"net/http"
-	_ "net/http/pprof"
 )
 
 func main() {
-	//性能调优
-	go func() {
-		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
-	}()
-
 	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +37,6 @@ func main() {
 		DanmuCenter.SetSaveFilter( //是否入库检测
 			DanmuCenter.NewUserLevelFilter(5),                                           // 过滤掉用户等级>=5的
 			DanmuCenter.NewFansMedalFilter(3),                                           // 过滤掉粉丝勋章等级>=3的
-			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),                    // 关键词匹配过滤
 			DanmuCenter.NewHaveBeenBanFilter(),                                          //过滤掉已被Ban的弹幕
 			DanmuCenter.NewLenFilter(9, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
 		),
@@ -55,6 +49,23 @@ func main() {
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
 	)
+
+	go func() {
+		//提供导入窗口
+		http.HandleFunc("/addWindow", func(w http.ResponseWriter, r *http.Request) {
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "can't get body", http.StatusBadRequest)
+				return
+			}
+			bodyStr := string(body)
+			log.Println("add Window", bodyStr)
+			banWindowFilter.Ban(&DanmuCenter.BanData{Content: bodyStr})
+			io.WriteString(w, "add string ["+bodyStr+"] success")
+		})
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
+	}()
+
 	center.Start()
 }
 
@@ -111,13 +122,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 		TimeStamp: banData.Timestamp,
 		Reason:    banData.Reason,
 	})
-	req, err := http.NewRequest("POST", syncUrl, bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Panicln("create sync request failt", err)
-	}
-	req.Header.Set("Content-type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Post(syncUrl, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		panic(err)
 	}
