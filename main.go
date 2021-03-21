@@ -40,11 +40,11 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
-			DanmuCenter.NewUserLevelFilter(5),                                            // 过滤掉用户等级>=5的
-			DanmuCenter.NewFansMedalFilter(3),                                            // 过滤掉粉丝勋章等级>=3的
-			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),                     // 关键词匹配过滤
-			DanmuCenter.NewHaveBeenBanFilter(),                                           //过滤掉已被Ban的弹幕
-			DanmuCenter.NewLenFilter(10, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
+			DanmuCenter.NewUserLevelFilter(5),                                           // 过滤掉用户等级>=5的
+			DanmuCenter.NewFansMedalFilter(3),                                           // 过滤掉粉丝勋章等级>=3的
+			DanmuCenter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),                    // 关键词匹配过滤
+			DanmuCenter.NewHaveBeenBanFilter(),                                          //过滤掉已被Ban的弹幕
+			DanmuCenter.NewLenFilter(9, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
 		),
 		DanmuCenter.SetSafeFilter( //是否正常弹幕
 			DanmuCenter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
