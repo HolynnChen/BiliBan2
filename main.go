@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
+	jsoniter "github.com/json-iterator/go"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -47,7 +51,7 @@ func main() {
 		),
 		DanmuCenter.SetBanFilter( //是否异常弹幕
 			banWindowFilter, //与封禁窗口比较
-			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
+			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 4), //时间范围内达到startCheck后检测最新几组的相似率
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
 	)
@@ -72,6 +76,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	go process.db.Create(&SaveData{
 		Data: *banData,
 	})
+	go syncBan(banData)
 }
 
 func (process *CustomBanProcess) Restore(limit int) {
@@ -84,4 +89,39 @@ func (process *CustomBanProcess) Restore(limit int) {
 	for _, data := range saveDatas {
 		process.filter.Ban(&data.Data)
 	}
+}
+
+type SyncData struct {
+	UserID    int64  `json:"UserId"`
+	UserName  string `json:"UserName"`
+	RoomID    int    `json:"RoomId"`
+	Content   string `json:"Content"`
+	TimeStamp int64  `json:"TimeStamp"`
+	Reason    string `json:"Reason"`
+}
+
+const syncUrl = "https://api.expublicsite.com:27777/bilibili/coopBlock/block"
+
+func syncBan(banData *DanmuCenter.BanData) {
+	jsonData, _ := jsoniter.Marshal(SyncData{
+		UserID:    banData.UserID,
+		UserName:  banData.UserName,
+		RoomID:    banData.RoomID,
+		Content:   banData.Content,
+		TimeStamp: banData.Timestamp,
+		Reason:    banData.Reason,
+	})
+	req, err := http.NewRequest("POST", syncUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Panicln("create sync request failt", err)
+	}
+	req.Header.Set("Content-type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
 }
