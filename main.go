@@ -34,7 +34,7 @@ func main() {
 	banProcess.Restore(100)                                            //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
-		TimeRange:      20,
+		TimeRange:      16,
 		MonitorNumber:  100,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
@@ -51,7 +51,7 @@ func main() {
 		),
 		DanmuCenter.SetBanFilter( //是否异常弹幕
 			banWindowFilter, //与封禁窗口比较
-			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 4), //时间范围内达到startCheck后检测最新几组的相似率
+			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
 	)
