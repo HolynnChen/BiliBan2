@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d
 	github.com/dlclark/regexp2 v1.4.0
-	github.com/holynnchen/bililive v0.0.0-20210317183619-7ac0dabc3f33
+	github.com/holynnchen/bililive v0.0.0-20210322184317-e6d947349726
 	github.com/json-iterator/go v1.1.10
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
