@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Filter"
 	jsoniter "github.com/json-iterator/go"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -24,9 +25,9 @@ func main() {
 	}
 	db.AutoMigrate(&SaveData{})
 
-	banWindowFilter := DanmuCenter.NewBanWindowFilter(100, 3600, 0.75) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
-	banProcess := &CustomBanProcess{db: db, filter: banWindowFilter}   //创建自定义封禁处理结构体
-	banProcess.Restore(100)                                            //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75)    //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
+	banProcess := &CustomBanProcess{db: db, filter: banWindowFilter} //创建自定义封禁处理结构体
+	banProcess.Restore(100)                                          //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
@@ -35,17 +36,18 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
-			DanmuCenter.NewUserLevelFilter(5),                                           // 过滤掉用户等级>=5的
-			DanmuCenter.NewFansMedalFilter(3),                                           // 过滤掉粉丝勋章等级>=3的
-			DanmuCenter.NewHaveBeenBanFilter(),                                          //过滤掉已被Ban的弹幕
-			DanmuCenter.NewLenFilter(9, DanmuCenter.SetLenFilterCompressRepeatGroup(3)), //过滤掉重复词压缩后长度小于9的弹幕
+			Filter.NewUserLevelFilter(5),                                      // 过滤掉用户等级>=5的
+			Filter.NewFansMedalFilter(3),                                      // 过滤掉粉丝勋章等级>=3的
+			Filter.NewHaveBeenBanFilter(),                                     // 过滤掉已被Ban的弹幕
+			Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
+			Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)), // 过滤掉重复词压缩后长度小于8的弹幕
 		),
 		DanmuCenter.SetSafeFilter( //是否正常弹幕
-			DanmuCenter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
+			Filter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
 		),
 		DanmuCenter.SetBanFilter( //是否异常弹幕
 			banWindowFilter, //与封禁窗口比较
-			DanmuCenter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
+			Filter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
 	)
@@ -87,7 +89,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	go process.db.Create(&SaveData{
 		Data: *banData,
 	})
-	go syncBan(banData)
+	// go syncBan(banData)
 }
 
 func (process *CustomBanProcess) Restore(limit int) {

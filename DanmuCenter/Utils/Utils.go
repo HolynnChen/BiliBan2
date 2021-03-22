@@ -1,4 +1,4 @@
-package DanmuCenter
+package Utils
 
 import (
 	"io/ioutil"
@@ -8,6 +8,8 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 )
+
+type Empty struct{}
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 

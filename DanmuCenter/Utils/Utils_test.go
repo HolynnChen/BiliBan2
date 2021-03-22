@@ -1,4 +1,4 @@
-package DanmuCenter
+package Utils
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ func TestGetHotRoom(t *testing.T) {
 }
 
 func TestTry(t *testing.T) {
-	s := `\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/\花丸/`
+	s := `看我照片你懂的！！！`
 	fmt.Println(CompressRepeatGroup(3)(s))
 }
 

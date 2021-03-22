@@ -3,20 +3,26 @@ package DanmuCenter
 import (
 	"sync"
 
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 	"github.com/holynnchen/bililive"
 )
 
 type Process func(content string) string
 
-type Filter interface {
-	Check(center *DanmuCenter, danmu *Danmu) (bool, string)
+type SafeFilter interface {
+	SafeCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
+}
+
+type SaveFilter interface {
+	SaveCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
+}
+type BanFilter interface {
+	BanCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
 }
 
 type BanProcess interface {
 	Ban(banData *BanData)
 }
-
-type Empty struct{}
 
 type DanmuCenter struct {
 	DanmuDB *sync.Map      // 弹幕储存
@@ -24,12 +30,12 @@ type DanmuCenter struct {
 	Live    *bililive.Live // 直播间实例
 	//private
 	config     *DanmuCenterConfig
-	saveFilter []Filter
-	safeFilter []Filter
-	banFilter  []Filter
+	saveFilter []SaveFilter
+	safeFilter []SafeFilter
+	banFilter  []BanFilter
 	banProcess BanProcess
 	banIndex   []int64
-	roomIDs    map[int]Empty
+	roomIDs    map[int]Utils.Empty
 }
 
 type DanmuCenterConfig struct {
@@ -62,21 +68,21 @@ type BanData struct {
 }
 
 // Filter->true 正常弹幕
-func SetSafeFilter(filters ...Filter) DanmuCenterOption {
+func SetSafeFilter(filters ...SafeFilter) DanmuCenterOption {
 	return func(center *DanmuCenter) {
 		center.safeFilter = append(center.safeFilter, filters...)
 	}
 }
 
 // Filter->true 封禁弹幕
-func SetBanFilter(filters ...Filter) DanmuCenterOption {
+func SetBanFilter(filters ...BanFilter) DanmuCenterOption {
 	return func(center *DanmuCenter) {
 		center.banFilter = append(center.banFilter, filters...)
 	}
 }
 
 // Filter->true 过滤不入库不检测
-func SetSaveFilter(filter ...Filter) DanmuCenterOption {
+func SetSaveFilter(filter ...SaveFilter) DanmuCenterOption {
 	return func(center *DanmuCenter) {
 		center.saveFilter = append(center.saveFilter, filter...)
 	}

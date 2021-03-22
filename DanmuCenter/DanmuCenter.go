@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 	"github.com/holynnchen/bililive"
 )
 
@@ -15,12 +16,12 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 		DanmuDB:    new(sync.Map),
 		BanDB:      new(sync.Map),
 		config:     config,
-		saveFilter: make([]Filter, 0),
-		safeFilter: make([]Filter, 0),
-		banFilter:  make([]Filter, 0),
+		saveFilter: make([]SaveFilter, 0),
+		safeFilter: make([]SafeFilter, 0),
+		banFilter:  make([]BanFilter, 0),
 		banProcess: nil,
 		banIndex:   make([]int64, 0),
-		roomIDs:    make(map[int]Empty),
+		roomIDs:    make(map[int]Utils.Empty),
 	}
 	live := &bililive.Live{
 		Debug:              false,
@@ -49,7 +50,7 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	}
 	//是否入库检测
 	for _, filter := range c.saveFilter {
-		if ok, _ := filter.Check(c, danmu); ok {
+		if ok, _ := filter.SaveCheck(c, danmu); ok {
 			return
 		}
 	}
@@ -57,13 +58,13 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	c.DanmuDB.Store(danmu.UserID, append(c.GetRecentDanmu(danmu.UserID), danmu))
 	//判断是否正常弹幕
 	for _, filter := range c.safeFilter {
-		if ok, _ := filter.Check(c, danmu); ok {
+		if ok, _ := filter.SafeCheck(c, danmu); ok {
 			return
 		}
 	}
 	//判断是否异常弹幕
 	for _, filter := range c.banFilter {
-		if ban, reason := filter.Check(c, danmu); ban {
+		if ban, reason := filter.BanCheck(c, danmu); ban {
 			banData := &BanData{
 				UserID:    danmu.UserID,
 				UserName:  danmu.UserName,
@@ -133,9 +134,9 @@ func (c *DanmuCenter) updateRoom(monitorNumber int) error {
 	)
 	switch c.config.RankType {
 	case 0:
-		newRoomIDs, err = GetTopRoom(monitorNumber)
+		newRoomIDs, err = Utils.GetTopRoom(monitorNumber)
 	case 1:
-		newRoomIDs, err = GetTop50HotRoom()
+		newRoomIDs, err = Utils.GetTop50HotRoom()
 	default:
 		err = errors.New("no such rank type ")
 	}
@@ -149,11 +150,11 @@ func (c *DanmuCenter) updateRoom(monitorNumber int) error {
 	removeList := make([]int, 0)
 	for _, id := range newRoomIDs {
 		if _, ok := c.roomIDs[id]; !ok {
-			c.roomIDs[id] = Empty{}
+			c.roomIDs[id] = Utils.Empty{}
 			addList = append(addList, id)
 		}
 	}
-	newRoomIDsMap := IntArrayToMap(newRoomIDs)
+	newRoomIDsMap := Utils.IntArrayToMap(newRoomIDs)
 	for id := range c.roomIDs {
 		if _, ok := newRoomIDsMap[id]; !ok {
 			removeList = append(removeList, id)

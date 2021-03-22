@@ -1,11 +1,11 @@
-package DanmuCenter
+package Utils
 
 import (
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/Holynnchen/BiliBan2/DanmuCenter/static"
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils/static"
 	"github.com/dlclark/regexp2"
 )
 

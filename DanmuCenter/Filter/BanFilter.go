@@ -1,9 +1,11 @@
-package DanmuCenter
+package Filter
 
 import (
 	"log"
 	"time"
 
+	"github.com/Holynnchen/BiliBan2/DanmuCenter"
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 	"github.com/TheFutureIsOurs/ahocorasick"
 )
 
@@ -13,7 +15,7 @@ type highSimilarityAndSpeedFilter struct {
 	startCheck int
 }
 
-func (filter *highSimilarityAndSpeedFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
+func (filter *highSimilarityAndSpeedFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	danmuList := center.GetRecentDanmu(danmu.UserID)
 	dataLen := len(danmuList)
 	if dataLen < filter.startCheck {
@@ -21,12 +23,15 @@ func (filter *highSimilarityAndSpeedFilter) Check(center *DanmuCenter, danmu *Da
 	}
 	var allCompare float32 = 0
 	for i := 1; i < dataLen; i++ {
-		allCompare = (allCompare*float32(i-1) + GetSimilarity(danmuList[dataLen-i].Content, danmuList[dataLen-i-1].Content)) / float32(i)
+		allCompare = (allCompare*float32(i-1) + Utils.GetSimilarity(danmuList[dataLen-i].Content, danmuList[dataLen-i-1].Content)) / float32(i)
 		if i > filter.startCheck-1 && allCompare > filter.similarity {
 			return true, "时间范围内近似发言过多"
 		}
 	}
 	return false, ""
+}
+func (filter *highSimilarityAndSpeedFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+	return filter.Check(center, danmu)
 }
 
 func NewHighSimilarityAndSpeedFilter(similarity float32, startCheck int) *highSimilarityAndSpeedFilter {
@@ -50,14 +55,14 @@ type banWindowData struct {
 	banTime   int64
 }
 
-func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
-	content := ReplaceSimilarAndNumberRune(danmu.Content)
+func (filter *banWindowFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+	content := Utils.ReplaceSimilarAndNumberRune(danmu.Content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
 			break
 		}
-		if GetSimilarity(banWindowData.banString, content) > filter.similarity {
+		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			banWindowData.banTime = time.Now().Unix() //时间续期
 			return true, "匹配封禁窗口"
 		}
@@ -65,14 +70,14 @@ func (filter *banWindowFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, s
 	return false, ""
 }
 
-func (filter *banWindowFilter) Ban(banData *BanData) {
-	content := ReplaceSimilarAndNumberRune(banData.Content)
+func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
+	content := Utils.ReplaceSimilarAndNumberRune(banData.Content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if time.Now().Unix()-banWindowData.banTime > filter.banWindowTime {
 			break
 		}
-		if GetSimilarity(banWindowData.banString, content) > filter.similarity {
+		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			return
 		}
 	}
@@ -98,8 +103,17 @@ type keyWordFilter struct {
 	*ahocorasick.Ac
 }
 
-func (filter *keyWordFilter) Check(center *DanmuCenter, danmu *Danmu) (bool, string) {
+func (filter *keyWordFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	return filter.MultiPatternHit([]rune(danmu.Content)), "关键词匹配"
+}
+func (filter *keyWordFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+	return filter.Check(center, danmu)
+}
+func (filter *keyWordFilter) SafeCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+	return filter.Check(center, danmu)
+}
+func (filter *keyWordFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+	return filter.Check(center, danmu)
 }
 
 func NewKeyWordFilter(keywords []string) *keyWordFilter {
