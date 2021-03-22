@@ -36,9 +36,10 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
-			Filter.NewUserLevelFilter(5),                                      // 过滤掉用户等级>=5的
-			Filter.NewFansMedalFilter(3),                                      // 过滤掉粉丝勋章等级>=3的
-			Filter.NewHaveBeenBanFilter(),                                     // 过滤掉已被Ban的弹幕
+			banWindowFilter,               // 移除高等级的窗口
+			Filter.NewUserLevelFilter(5),  // 过滤掉用户等级>=5的
+			Filter.NewFansMedalFilter(3),  // 过滤掉粉丝勋章等级>=3的
+			Filter.NewHaveBeenBanFilter(), // 过滤掉已被Ban的弹幕
 			Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
 			Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)), // 过滤掉重复词压缩后长度小于8的弹幕
 		),
