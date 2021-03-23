@@ -31,9 +31,9 @@ func main() {
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
-		MonitorNumber:  200,
+		MonitorNumber:  300,
 		SpecialFocusOn: []int{1370218}, //1237390
-		// Silent:         true,
+		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
 			banWindowFilter,               // 移除高等级的窗口
