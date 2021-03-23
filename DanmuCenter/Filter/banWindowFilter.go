@@ -22,6 +22,8 @@ type banWindowData struct {
 	disable    bool
 }
 
+const hightSaveCheck float32 = 0.85 // 固定安全期望
+
 func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	if danmu.MedalLevel == 0 && danmu.UserLevel < 3 {
 		return false, ""
@@ -35,7 +37,7 @@ func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu 
 		if banWindowData.disable {
 			continue
 		}
-		if Utils.GetSimilarity(banWindowData.banString, content) > 0.9 { //固定在0.9
+		if Utils.GetSimilarity(banWindowData.banString, content) > hightSaveCheck {
 			banWindowData.disable = true
 			break
 		}
@@ -50,12 +52,16 @@ func (filter *banWindowFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *
 		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
 		}
-		if banWindowData.disable || banWindowData.enableTime > time.Now().Unix() {
+		if banWindowData.enableTime > time.Now().Unix() {
 			continue
 		}
-		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
+		similarity := Utils.GetSimilarity(banWindowData.banString, content)
+		if !banWindowData.disable && similarity > filter.similarity {
 			banWindowData.enableTime = time.Now().Unix() //时间续期
 			return true, "匹配封禁窗口"
+		}
+		if banWindowData.disable && similarity > hightSaveCheck {
+			return false, ""
 		}
 	}
 	return false, ""
