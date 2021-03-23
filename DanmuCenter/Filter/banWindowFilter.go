@@ -79,6 +79,13 @@ func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
 	}
 }
 
+/*
+生成一个窗口大小为banWindowSize，最短有效时间为banWindowTime，要求相似率为similarity的封禁窗口
+该窗口用于快速匹配相似语句，达到快速封杀的目的
+为了防止手动节奏的情况，增加了后悔机制
+    加入窗口后，要过10s后才会生效
+    加入窗口后，若有粉丝勋章等级>0 或 用户等级>=3的相似率大于0.9的发言，那么将禁用此条记录
+*/
 func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32) *banWindowFilter {
 	return &banWindowFilter{
 		banWindow:     make([]*banWindowData, banWindowSize, banWindowSize),
