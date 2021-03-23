@@ -50,6 +50,9 @@ func (filter *banWindowFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *
 		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
 		}
+		if banWindowData.disable || banWindowData.enableTime > time.Now().Unix() {
+			continue
+		}
 		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			banWindowData.enableTime = time.Now().Unix() //时间续期
 			return true, "匹配封禁窗口"
@@ -64,9 +67,6 @@ func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
-		}
-		if banWindowData.disable || banWindowData.enableTime > time.Now().Unix() {
-			continue
 		}
 		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
 			return
