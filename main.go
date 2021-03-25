@@ -41,7 +41,7 @@ func main() {
 			Filter.NewFansMedalFilter(3),  // 过滤掉粉丝勋章等级>=3的
 			Filter.NewHaveBeenBanFilter(), // 过滤掉已被Ban的弹幕
 			Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
-			Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)), // 过滤掉重复词压缩后长度小于8的弹幕
+			Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)), // 过滤掉重复词压缩后长度小于9的弹幕
 		),
 		DanmuCenter.SetSafeFilter( //是否正常弹幕
 			Filter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
@@ -90,7 +90,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	go process.db.Create(&SaveData{
 		Data: *banData,
 	})
-	// go syncBan(banData)
+	go syncBan(banData)
 }
 
 func (process *CustomBanProcess) Restore(limit int) {

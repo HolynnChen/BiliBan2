@@ -14,7 +14,7 @@ func TestGetHotRoom(t *testing.T) {
 }
 
 func TestTry(t *testing.T) {
-	s := `看我照片你懂的！！！`
+	s := `帆布包我来啦啦啦啦啦啦啦啦啦啦啦啦啦啦`
 	fmt.Println(CompressRepeatGroup(3)(s))
 }
 
