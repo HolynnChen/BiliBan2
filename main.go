@@ -31,7 +31,7 @@ func main() {
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
-		MonitorNumber:  300,
+		MonitorNumber:  500,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
