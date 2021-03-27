@@ -1,6 +1,7 @@
 package Filter
 
 import (
+	"log"
 	"time"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
@@ -38,6 +39,7 @@ func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu 
 			continue
 		}
 		if Utils.GetSimilarity(banWindowData.banString, content) > hightSaveCheck {
+			log.Printf("解封窗口 %+v\n", banWindowData)
 			banWindowData.disable = true
 			break
 		}
@@ -79,6 +81,7 @@ func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
 		}
 	}
 	filter.banWindow[filter.writeMark] = &banWindowData{banString: content, enableTime: time.Now().Unix() + 10, disable: false}
+	log.Printf("加入窗口 %+v\n", filter.banWindow[filter.writeMark])
 	filter.writeMark = (filter.writeMark + 1) % filter.banWindowSize
 	if filter.nowSize < filter.banWindowSize {
 		filter.nowSize++
