@@ -16,6 +16,7 @@ import (
 
 	//性能调优
 	"net/http"
+	_ "net/http/pprof"
 )
 
 func main() {
