@@ -111,12 +111,19 @@ func GetSimilarity(a, b string) float32 {
 }
 
 func GetEditDistance(a, b string) int {
+	if a == b {
+		return 0
+	}
 	ar, br := []rune(a), []rune(b)
 	aLen, bLen := len(ar), len(br)
+	if aLen > bLen {
+		aLen, bLen, ar, br = bLen, aLen, br, ar
+	}
 	distance := make([]int, aLen+1)
 	for i := 0; i <= aLen; i++ {
 		distance[i] = i
 	}
+	_ = distance[aLen]
 	for i := 1; i <= bLen; i++ {
 		left, up := i, i-1
 		for j := 1; j <= aLen; j++ {
