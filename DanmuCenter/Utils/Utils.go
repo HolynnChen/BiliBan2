@@ -116,6 +116,12 @@ func GetEditDistance(a, b string) int {
 	}
 	ar, br := []rune(a), []rune(b)
 	aLen, bLen := len(ar), len(br)
+	if aLen == 0 {
+		return bLen
+	}
+	if bLen == 0 {
+		return aLen
+	}
 	if aLen > bLen {
 		aLen, bLen, ar, br = bLen, aLen, br, ar
 	}

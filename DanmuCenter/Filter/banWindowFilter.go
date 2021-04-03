@@ -38,8 +38,8 @@ func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu 
 		if banWindowData.disable {
 			continue
 		}
-		if Utils.GetSimilarity(banWindowData.banString, content) > hightSaveCheck {
-			log.Printf("解封窗口 %+v %+v\n", banWindowData, danmu)
+		if checkValue := Utils.GetSimilarity(banWindowData.banString, content); checkValue > hightSaveCheck {
+			log.Printf("解封窗口 %.4f %+v %+v\n", checkValue, banWindowData, danmu)
 			banWindowData.disable = true
 			break
 		}

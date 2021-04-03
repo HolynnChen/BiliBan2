@@ -24,5 +24,6 @@ func TestMap(t *testing.T) {
 }
 
 func TestGetEditDistance(t *testing.T) {
-	fmt.Println(GetEditDistance("v舰⻓茵拼##########", "."))
+	fmt.Println(GetEditDistance("##########星⼩智实属⽜逼", "............"))
+	fmt.Println(GetSimilarity("##########星⼩智实属⽜逼", "............"))
 }
