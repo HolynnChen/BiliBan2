@@ -24,5 +24,5 @@ func TestMap(t *testing.T) {
 }
 
 func TestGetEditDistance(t *testing.T) {
-	fmt.Println(GetEditDistance("abc", "cba"))
+	fmt.Println(GetEditDistance("v舰⻓茵拼##########", "."))
 }

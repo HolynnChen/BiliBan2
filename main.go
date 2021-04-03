@@ -36,6 +36,7 @@ func main() {
 		Silent:         true,
 	},
 		DanmuCenter.SetSaveFilter( //是否入库检测
+			Filter.NewLenFilter(8),        // 简易长度过滤
 			banWindowFilter,               // 移除高等级的窗口
 			Filter.NewUserLevelFilter(5),  // 过滤掉用户等级>=5的
 			Filter.NewFansMedalFilter(3),  // 过滤掉粉丝勋章等级>=3的
