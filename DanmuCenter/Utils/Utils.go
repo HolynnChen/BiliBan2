@@ -106,7 +106,9 @@ func IntArrayToMap(a []int) map[int]Empty {
 }
 
 func GetSimilarity(a, b string) float32 {
-	aLen, bLen, distance := utf8.RuneCountInString(a), utf8.RuneCountInString(b), GetEditDistance(a, b)
+	// aLen, bLen, distance := utf8.RuneCountInString(a), utf8.RuneCountInString(b), GetEditDistance(a, b)
+	aLen, bLen, distance := utf8.RuneCountInString(a), utf8.RuneCountInString(b), Distance(a, b) // 切换至不安全的编辑距离
+
 	return maxFloat32(1 - float32(distance)/maxFloat32(float32(aLen), float32(bLen)))
 }
 
