@@ -5,7 +5,7 @@ import (
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 )
 
-//封禁高速发言且整体连续(三条)相似度大于similarity的账户
+//封禁高速发言且整体连续(startCheck条)相似度大于similarity的账户
 type highSimilarityAndSpeedFilter struct {
 	similarity float32
 	startCheck int
