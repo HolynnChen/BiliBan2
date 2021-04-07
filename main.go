@@ -10,7 +10,7 @@ import (
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Filter"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/goccy/go-json"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -118,7 +118,7 @@ type SyncData struct {
 const syncUrl = "https://api.expublicsite.com:27777/bilibili/coopBlock/v1/block"
 
 func syncBan(banData *DanmuCenter.BanData) {
-	jsonData, _ := jsoniter.Marshal(SyncData{
+	jsonData, _ := json.Marshal(SyncData{
 		UserID:    banData.UserID,
 		UserName:  banData.UserName,
 		RoomID:    banData.RoomID,

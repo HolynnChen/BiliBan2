@@ -6,12 +6,10 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	jsoniter "github.com/json-iterator/go"
+	"github.com/goccy/go-json"
 )
 
 type Empty struct{}
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type TopRoomResponse struct {
 	Code    int    `json:"code"`
