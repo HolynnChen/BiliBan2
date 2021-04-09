@@ -128,7 +128,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 	})
 	resp, err := http.DefaultClient.Post(syncUrl, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
