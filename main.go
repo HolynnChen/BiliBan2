@@ -112,7 +112,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 		Data: *banData,
 	})
 	go syncBan(banData)
-	go process.reporter(banData)
+	//go process.reporter(banData)
 }
 
 func (process *CustomBanProcess) Restore(limit int) {
