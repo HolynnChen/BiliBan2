@@ -6,10 +6,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Filter"
+	"github.com/Holynnchen/BiliBan2/DanmuCenter/Helper"
 	"github.com/goccy/go-json"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -18,6 +21,18 @@ import (
 	"net/http"
 )
 
+var env = make(map[string]interface{})
+
+func init() {
+	if _, err := os.Stat("env.toml"); err != nil {
+		return
+	}
+	if _, err := toml.DecodeFile("env.toml", &env); err != nil {
+		log.Panic(err)
+	}
+	fmt.Printf("变量值: %+v\n", env)
+}
+
 func main() {
 	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
 	if err != nil {
@@ -25,13 +40,17 @@ func main() {
 	}
 	db.AutoMigrate(&SaveData{})
 
-	banWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75)    //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
-	banProcess := &CustomBanProcess{db: db, filter: banWindowFilter} //创建自定义封禁处理结构体
-	banProcess.Restore(100)                                          //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
+	banProcess := &CustomBanProcess{
+		db:       db,
+		filter:   banWindowFilter,
+		reporter: Helper.Reporter(env["cookie"].(string), env["csrf"].(string)),
+	} //创建自定义封禁处理结构体
+	banProcess.Restore(100) //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
-		MonitorNumber:  500,
+		MonitorNumber:  100,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
@@ -74,8 +93,9 @@ func main() {
 }
 
 type CustomBanProcess struct {
-	filter DanmuCenter.BanProcess
-	db     *gorm.DB
+	filter   DanmuCenter.BanProcess
+	db       *gorm.DB
+	reporter func(*DanmuCenter.BanData)
 }
 
 type SaveData struct {
@@ -92,6 +112,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 		Data: *banData,
 	})
 	go syncBan(banData)
+	go process.reporter(banData)
 }
 
 func (process *CustomBanProcess) Restore(limit int) {
@@ -115,8 +136,6 @@ type SyncData struct {
 	Reason    string `json:"Reason"`
 }
 
-const syncUrl = "https://api.expublicsite.com:27777/bilibili/coopBlock/v1/block"
-
 func syncBan(banData *DanmuCenter.BanData) {
 	jsonData, _ := json.Marshal(SyncData{
 		UserID:    banData.UserID,
@@ -126,7 +145,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 		TimeStamp: banData.Timestamp,
 		Reason:    banData.Reason,
 	})
-	resp, err := http.DefaultClient.Post(syncUrl, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.DefaultClient.Post(env["sync_url"].(string), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Println(err)
 		return

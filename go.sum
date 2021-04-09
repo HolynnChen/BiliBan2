@@ -1,3 +1,5 @@
+github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
+github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d h1:EoCC90j/N+SaDxRxB88eFEMTrM0evEXnJBkWJF0IpJ4=
 github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d/go.mod h1:xYCHUeGQKuH1enEzp3ED/OfQqq/+BE6cfZO6/YfRlmY=
 github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E=
