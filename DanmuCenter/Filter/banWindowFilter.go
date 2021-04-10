@@ -8,7 +8,7 @@ import (
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 )
 
-type banWindowFilter struct {
+type BanWindowFilter struct {
 	banWindow     []*banWindowData
 	banWindowSize int
 	banWindowTime int64
@@ -25,14 +25,14 @@ type banWindowData struct {
 
 const hightSaveCheck float32 = 0.85 // 固定安全期望
 
-func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *BanWindowFilter) UnlockCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	if danmu.MedalLevel == 0 && danmu.UserLevel < 3 {
 		return false, ""
 	}
 	content := Utils.ReplaceSimilarAndNumberRune(danmu.Content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
-		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
+		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
 		}
 		if banWindowData.disable {
@@ -47,11 +47,11 @@ func (filter *banWindowFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu 
 	return false, ""
 }
 
-func (filter *banWindowFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	content := Utils.ReplaceSimilarAndNumberRune(danmu.Content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
-		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
+		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
 		}
 		if banWindowData.enableTime > time.Now().Unix() {
@@ -69,11 +69,11 @@ func (filter *banWindowFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *
 	return false, ""
 }
 
-func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
+func (filter *BanWindowFilter) Add(banData *DanmuCenter.BanData) {
 	content := Utils.ReplaceSimilarAndNumberRune(banData.Content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
-		if time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
+		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
 			break
 		}
 		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
@@ -95,8 +95,8 @@ func (filter *banWindowFilter) Ban(banData *DanmuCenter.BanData) {
     加入窗口后，要过10s后才会生效
     加入窗口后，若有粉丝勋章等级>0 或 用户等级>=3的相似率大于0.9的发言，那么将禁用此条记录
 */
-func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32) *banWindowFilter {
-	return &banWindowFilter{
+func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32) *BanWindowFilter {
+	return &BanWindowFilter{
 		banWindow:     make([]*banWindowData, banWindowSize, banWindowSize),
 		banWindowSize: banWindowSize,
 		banWindowTime: banWindowTime,

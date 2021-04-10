@@ -54,21 +54,19 @@ func main() {
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
-		DanmuCenter.SetSaveFilter( //是否入库检测
-			Filter.NewLenFilter(8),        // 简易长度过滤
-			banWindowFilter,               // 移除高等级的窗口
-			Filter.NewUserLevelFilter(5),  // 过滤掉用户等级>=5的
-			Filter.NewFansMedalFilter(3),  // 过滤掉粉丝勋章等级>=3的
-			Filter.NewHaveBeenBanFilter(), // 过滤掉已被Ban的弹幕
-			Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
-			Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)), // 过滤掉重复词压缩后长度小于9的弹幕
+		DanmuCenter.SetPreFilter( //入库前检测
+			Helper.Safe(Filter.NewLenFilter(8).Check),         // 简易长度过滤
+			Helper.Continue(banWindowFilter.UnlockCheck),      // 移除高等级的窗口
+			Helper.Safe(Filter.NewUserLevelFilter(5).Check),   // 过滤掉用户等级>=5的
+			Helper.Safe(Filter.NewFansMedalFilter(3).Check),   // 过滤掉粉丝勋章等级>=3的
+			Helper.Break(Filter.NewHaveBeenBanFilter().Check), // 过滤掉已被Ban的弹幕
+			// Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
+			Helper.Safe(Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)).Check), // 过滤掉重复词压缩后长度小于9的弹幕
 		),
-		DanmuCenter.SetSafeFilter( //是否正常弹幕
-			Filter.NewHighReatWordFilter(0.75), //单字符重复率>0.75视作正常弹幕
-		),
-		DanmuCenter.SetBanFilter( //是否异常弹幕
-			banWindowFilter, //与封禁窗口比较
-			Filter.NewHighSimilarityAndSpeedFilter(0.75, 3), //时间范围内达到startCheck后检测最新几组的相似率
+		DanmuCenter.SetAfterFilter( //入库后检测
+			Helper.Safe(Filter.NewHighReatWordFilter(0.75).Check),             //单字符重复率>0.75视作正常弹幕
+			Helper.Ban(banWindowFilter.MatchCheck),                            //与封禁窗口比较
+			Helper.Ban(Filter.NewHighSimilarityAndSpeedFilter(0.75, 3).Check), //时间范围内达到startCheck后检测最新几组的相似率
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
 	)
@@ -83,7 +81,7 @@ func main() {
 			}
 			bodyStr := string(body)
 			log.Println("add Window", bodyStr)
-			banWindowFilter.Ban(&DanmuCenter.BanData{Content: bodyStr})
+			banWindowFilter.Add(&DanmuCenter.BanData{Content: bodyStr})
 			io.WriteString(w, "add string ["+bodyStr+"] success")
 		})
 		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
@@ -93,7 +91,7 @@ func main() {
 }
 
 type CustomBanProcess struct {
-	filter   DanmuCenter.BanProcess
+	filter   *Filter.BanWindowFilter
 	db       *gorm.DB
 	reporter func(*DanmuCenter.BanData)
 }
@@ -106,7 +104,7 @@ type SaveData struct {
 
 func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	log.Printf("%+v\n", banData)
-	process.filter.Ban(banData)
+	process.filter.Add(banData)
 	//异步掉耗时操作
 	go process.db.Create(&SaveData{
 		Data: *banData,
@@ -123,7 +121,7 @@ func (process *CustomBanProcess) Restore(limit int) {
 	}
 	log.Printf("尝试导入%d条频繁发言封禁记录到封禁窗口", len(saveDatas))
 	for _, data := range saveDatas {
-		process.filter.Ban(&data.Data)
+		process.filter.Add(&data.Data)
 	}
 }
 

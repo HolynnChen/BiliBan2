@@ -7,27 +7,18 @@ import (
 	"github.com/TheFutureIsOurs/ahocorasick"
 )
 
-type keyWordFilter struct {
+type KeyWordFilter struct {
 	*ahocorasick.Ac
 }
 
-func (filter *keyWordFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *KeyWordFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	return filter.MultiPatternHit([]rune(danmu.Content)), "关键词匹配"
 }
-func (filter *keyWordFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
-func (filter *keyWordFilter) SafeCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
-func (filter *keyWordFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
 
-func NewKeyWordFilter(keywords []string) *keyWordFilter {
+func NewKeyWordFilter(keywords []string) *KeyWordFilter {
 	ac, err := ahocorasick.Build(keywords)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &keyWordFilter{ac}
+	return &KeyWordFilter{ac}
 }

@@ -3,23 +3,17 @@ package Filter
 import "github.com/Holynnchen/BiliBan2/DanmuCenter"
 
 // uid小于该区域视作安全
-type uidFilter struct {
+type UidFilter struct {
 	uidTarget int64
 }
 
-func (filter *uidFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *UidFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	return danmu.UserID < filter.uidTarget, ""
-}
-func (filter *uidFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
-func (filter *uidFilter) SafeCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
 }
 
 // Filter-> uid<uidTarget
-func NewUIDFilter(uidTarget int64) *uidFilter {
-	return &uidFilter{
+func NewUIDFilter(uidTarget int64) *UidFilter {
+	return &UidFilter{
 		uidTarget: uidTarget,
 	}
 }

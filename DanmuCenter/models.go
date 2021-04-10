@@ -9,33 +9,23 @@ import (
 
 type Process func(content string) string
 
-type SafeFilter interface {
-	SafeCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
-}
-
-type SaveFilter interface {
-	SaveCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
-}
-type BanFilter interface {
-	BanCheck(center *DanmuCenter, danmu *Danmu) (bool, string)
-}
-
 type BanProcess interface {
 	Ban(banData *BanData)
 }
+
+type Filter func(center *DanmuCenter, danmu *Danmu) (Action, string)
 
 type DanmuCenter struct {
 	DanmuDB *sync.Map      // 弹幕储存
 	BanDB   *sync.Map      // 封禁记录储存
 	Live    *bililive.Live // 直播间实例
 	//private
-	config     *DanmuCenterConfig
-	saveFilter []SaveFilter
-	safeFilter []SafeFilter
-	banFilter  []BanFilter
-	banProcess BanProcess
-	banIndex   []int64
-	roomIDs    map[int]Utils.Empty
+	config      *DanmuCenterConfig
+	preFilter   []Filter
+	afterFilter []Filter
+	banProcess  BanProcess
+	banIndex    []int64
+	roomIDs     map[int]Utils.Empty
 }
 
 type DanmuCenterConfig struct {
@@ -67,25 +57,20 @@ type BanData struct {
 	Reason    string `json:"reason"`
 }
 
-// Filter->true 正常弹幕
-func SetSafeFilter(filters ...SafeFilter) DanmuCenterOption {
+func SetPreFilter(filters ...Filter) DanmuCenterOption {
 	return func(center *DanmuCenter) {
-		center.safeFilter = append(center.safeFilter, filters...)
+		center.preFilter = append(center.preFilter, filters...)
 	}
 }
 
-// Filter->true 封禁弹幕
-func SetBanFilter(filters ...BanFilter) DanmuCenterOption {
+func SetAfterFilter(filters ...Filter) DanmuCenterOption {
 	return func(center *DanmuCenter) {
-		center.banFilter = append(center.banFilter, filters...)
+		center.afterFilter = append(center.afterFilter, filters...)
 	}
 }
 
-// Filter->true 过滤不入库不检测
-func SetSaveFilter(filter ...SaveFilter) DanmuCenterOption {
-	return func(center *DanmuCenter) {
-		center.saveFilter = append(center.saveFilter, filter...)
-	}
+func SetFilter(filters ...Filter) DanmuCenterOption {
+	return SetAfterFilter(filters...)
 }
 
 // Process 处理封禁情况

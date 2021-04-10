@@ -11,17 +11,24 @@ import (
 	"github.com/holynnchen/bililive"
 )
 
+type Action int
+
+const (
+	Continue Action = iota
+	Break
+	Ban
+)
+
 func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *DanmuCenter {
 	danmuCenter := &DanmuCenter{
-		DanmuDB:    new(sync.Map),
-		BanDB:      new(sync.Map),
-		config:     config,
-		saveFilter: make([]SaveFilter, 0),
-		safeFilter: make([]SafeFilter, 0),
-		banFilter:  make([]BanFilter, 0),
-		banProcess: nil,
-		banIndex:   make([]int64, 0),
-		roomIDs:    make(map[int]Utils.Empty),
+		DanmuDB:     new(sync.Map),
+		BanDB:       new(sync.Map),
+		config:      config,
+		preFilter:   make([]Filter, 0),
+		afterFilter: make([]Filter, 0),
+		banProcess:  nil,
+		banIndex:    make([]int64, 0),
+		roomIDs:     make(map[int]Utils.Empty),
 	}
 	live := &bililive.Live{
 		Debug:              0,
@@ -49,44 +56,55 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 		Content:    msg.Content,
 		Timestamp:  msg.Timestamp,
 	}
-	//是否入库检测
-	for _, filter := range c.saveFilter {
-		if ok, _ := filter.SaveCheck(c, danmu); ok {
-			return
-		}
+	//是否入库前检测
+	if ok := c.runFilters(&c.preFilter, danmu); ok {
+		return
 	}
 	//过滤过期
 	c.DanmuDB.Store(danmu.UserID, append(c.GetRecentDanmu(danmu.UserID), danmu))
-	//判断是否正常弹幕
-	for _, filter := range c.safeFilter {
-		if ok, _ := filter.SafeCheck(c, danmu); ok {
-			return
-		}
-	}
+
 	//判断是否异常弹幕
-	for _, filter := range c.banFilter {
-		if ban, reason := filter.BanCheck(c, danmu); ban {
-			banData := &BanData{
-				UserID:    danmu.UserID,
-				UserName:  danmu.UserName,
-				RoomID:    roomID,
-				Content:   danmu.Content,
-				Timestamp: danmu.Timestamp,
-				Reason:    reason,
-			}
-			if _, hasBan := c.BanDB.LoadOrStore(danmu.UserID, banData); hasBan {
-				return
-			}
-			c.banIndex = append(c.banIndex, danmu.UserID)
-			c.banProcess.Ban(banData)
-			return
-		}
-	}
+	c.runFilters(&c.afterFilter, danmu)
 }
 
 func (c *DanmuCenter) liveEnd(roomID int) {
 	delete(c.roomIDs, roomID)
 	c.Live.Remove(roomID)
+}
+
+func (c *DanmuCenter) runFilters(filters *[]Filter, danmu *Danmu) bool {
+	for _, filter := range c.preFilter {
+		action, reason := filter(c, danmu)
+		switch action {
+		case Break:
+			return true
+		case Ban:
+			c.ban(danmu, danmu.RoomID, reason)
+			return true
+		case Continue:
+			continue
+		default:
+			log.Println("error: fail to identify action")
+		}
+	}
+	return false
+}
+
+func (c *DanmuCenter) ban(danmu *Danmu, roomID int, reason string) {
+	banData := &BanData{
+		UserID:    danmu.UserID,
+		UserName:  danmu.UserName,
+		RoomID:    roomID,
+		Content:   danmu.Content,
+		Timestamp: danmu.Timestamp,
+		Reason:    reason,
+	}
+	if _, hasBan := c.BanDB.LoadOrStore(danmu.UserID, banData); hasBan {
+		return
+	}
+	c.banIndex = append(c.banIndex, danmu.UserID)
+	c.banProcess.Ban(banData)
+	return
 }
 
 func (c *DanmuCenter) filterValidDanmu(danmuList []*Danmu, timeRange int64) []*Danmu {

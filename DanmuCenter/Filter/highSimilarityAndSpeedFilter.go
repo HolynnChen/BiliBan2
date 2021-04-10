@@ -6,12 +6,12 @@ import (
 )
 
 //封禁高速发言且整体连续(startCheck条)相似度大于similarity的账户
-type highSimilarityAndSpeedFilter struct {
+type HighSimilarityAndSpeedFilter struct {
 	similarity float32
 	startCheck int
 }
 
-func (filter *highSimilarityAndSpeedFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *HighSimilarityAndSpeedFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	danmuList := center.GetRecentDanmu(danmu.UserID)
 	dataLen := len(danmuList)
 	if dataLen < filter.startCheck {
@@ -26,12 +26,9 @@ func (filter *highSimilarityAndSpeedFilter) Check(center *DanmuCenter.DanmuCente
 	}
 	return false, ""
 }
-func (filter *highSimilarityAndSpeedFilter) BanCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
 
-func NewHighSimilarityAndSpeedFilter(similarity float32, startCheck int) *highSimilarityAndSpeedFilter {
-	return &highSimilarityAndSpeedFilter{
+func NewHighSimilarityAndSpeedFilter(similarity float32, startCheck int) *HighSimilarityAndSpeedFilter {
+	return &HighSimilarityAndSpeedFilter{
 		similarity: similarity,
 		startCheck: startCheck,
 	}

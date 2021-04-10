@@ -5,23 +5,17 @@ import (
 )
 
 // fansMedalLever >=levelTarget视为正常
-type fansMedalFilter struct {
+type FansMedalFilter struct {
 	levelTarget int
 }
 
-func (filter *fansMedalFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
+func (filter *FansMedalFilter) Check(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
 	return danmu.MedalLevel >= filter.levelTarget, ""
-}
-func (filter *fansMedalFilter) SaveCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
-}
-func (filter *fansMedalFilter) SafeCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	return filter.Check(center, danmu)
 }
 
 // Filter-> fansMedalLevel >= leverTarget
-func NewFansMedalFilter(levelTarget int) *fansMedalFilter {
-	return &fansMedalFilter{
+func NewFansMedalFilter(levelTarget int) *FansMedalFilter {
+	return &FansMedalFilter{
 		levelTarget: levelTarget,
 	}
 }
