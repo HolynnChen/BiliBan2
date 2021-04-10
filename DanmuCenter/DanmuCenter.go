@@ -24,9 +24,10 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 		roomIDs:    make(map[int]Utils.Empty),
 	}
 	live := &bililive.Live{
-		Debug:              false,
+		Debug:              0,
 		AnalysisRoutineNum: 1, //顺序性处理有利于小规模下充分利用封禁窗口
 		StormFilter:        true,
+		LotteryDanmuFilter: true,
 		ReceiveMsg:         danmuCenter.liveReceiveMsg,
 		End:                danmuCenter.liveEnd,
 	}
