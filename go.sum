@@ -6,8 +6,8 @@ github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E
 github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/goccy/go-json v0.4.11 h1:92nyX606ZN/cUFwctfxwDWm8YWSA38Zlv9s7taFeLyo=
 github.com/goccy/go-json v0.4.11/go.mod h1:6MelG93GURQebXPDq3khkgXZkazVtN9CRI+MGFi0w8I=
-github.com/holynnchen/bililive v0.0.0-20210412024128-2fa1137e4bc5 h1:Co6UGpxojqfQjzUvPBQQvFBVW0H1YqTC2lN7dHlwuOs=
-github.com/holynnchen/bililive v0.0.0-20210412024128-2fa1137e4bc5/go.mod h1:Ckxu21Ns8aNjVrKhALIqkEfXLmyEgEH33HSwgV/garA=
+github.com/holynnchen/bililive v0.0.0-20210412074546-32b01f59cff4 h1:FHhXATBN/OQ/cpmO1+ZoKirM2/CYG48rnDdcRb124BE=
+github.com/holynnchen/bililive v0.0.0-20210412074546-32b01f59cff4/go.mod h1:Ckxu21Ns8aNjVrKhALIqkEfXLmyEgEH33HSwgV/garA=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.1 h1:g39TucaRWyV3dwDO++eEc6qf8TVIQ/Da48WmqjZ3i7E=
