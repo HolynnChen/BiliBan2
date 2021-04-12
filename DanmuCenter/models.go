@@ -49,6 +49,10 @@ type Danmu struct {
 	Timestamp  int64  // 时间戳
 }
 
+func (danmu *Danmu) DeepCopy() Danmu {
+	return *danmu
+}
+
 type BanData struct {
 	UserID    int64  `json:"user_id"`
 	UserName  string `json:"user_name"`

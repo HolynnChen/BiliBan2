@@ -46,17 +46,22 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 	return danmuCenter
 }
 
+var danmuPool = sync.Pool{
+	New: func() interface{} { return new(Danmu) },
+}
+
 func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
-	danmu := &Danmu{
-		RoomID:     roomID,
-		UserID:     msg.UserID,
-		UserName:   msg.UserName,
-		UserLevel:  msg.UserLevel,
-		MedalLevel: msg.MedalLevel,
-		Content:    msg.Content,
-		CT:         msg.CT,
-		Timestamp:  msg.Timestamp,
-	}
+	danmu := danmuPool.Get().(*Danmu)
+	danmu.RoomID = roomID
+	danmu.UserID = msg.UserID
+	danmu.UserName = msg.UserName
+	danmu.UserLevel = msg.UserLevel
+	danmu.MedalLevel = msg.MedalLevel
+	danmu.Content = msg.Content
+	danmu.CT = msg.CT
+	danmu.Timestamp = msg.Timestamp
+	defer danmuPool.Put(danmu)
+
 	//是否入库前检测
 	if ok := c.runFilters(&c.preFilter, danmu); ok {
 		return

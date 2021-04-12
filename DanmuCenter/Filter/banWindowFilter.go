@@ -69,7 +69,7 @@ func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu
 	return false, ""
 }
 
-func (filter *BanWindowFilter) Add(content string) {
+func (filter *BanWindowFilter) Add(content string) bool {
 	content = Utils.ReplaceSimilarAndNumberRune(content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
@@ -77,7 +77,7 @@ func (filter *BanWindowFilter) Add(content string) {
 			break
 		}
 		if Utils.GetSimilarity(banWindowData.banString, content) > filter.similarity {
-			return
+			return false
 		}
 	}
 	filter.banWindow[filter.writeMark] = &banWindowData{banString: content, enableTime: time.Now().Unix() + 10, disable: false}
@@ -86,6 +86,7 @@ func (filter *BanWindowFilter) Add(content string) {
 	if filter.nowSize < filter.banWindowSize {
 		filter.nowSize++
 	}
+	return true
 }
 
 /*
