@@ -45,6 +45,7 @@ type Danmu struct {
 	UserLevel  int    // 用户等级
 	MedalLevel int    // 勋章等级
 	Content    string // 弹幕内容
+	CT         string // 弹幕token
 	Timestamp  int64  // 时间戳
 }
 
@@ -53,6 +54,7 @@ type BanData struct {
 	UserName  string `json:"user_name"`
 	RoomID    int    `json:"room_id"`
 	Content   string `json:"content"`
+	CT        string `json:"ct"`
 	Timestamp int64  `json:"timestamp"`
 	Reason    string `json:"reason"`
 }

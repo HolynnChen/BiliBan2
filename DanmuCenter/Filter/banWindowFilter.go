@@ -69,8 +69,8 @@ func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu
 	return false, ""
 }
 
-func (filter *BanWindowFilter) Add(banData *DanmuCenter.BanData) {
-	content := Utils.ReplaceSimilarAndNumberRune(banData.Content)
+func (filter *BanWindowFilter) Add(content string) {
+	content = Utils.ReplaceSimilarAndNumberRune(content)
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {

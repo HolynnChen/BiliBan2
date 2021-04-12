@@ -54,6 +54,7 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 		UserLevel:  msg.UserLevel,
 		MedalLevel: msg.MedalLevel,
 		Content:    msg.Content,
+		CT:         msg.CT,
 		Timestamp:  msg.Timestamp,
 	}
 	//是否入库前检测
@@ -98,6 +99,7 @@ func (c *DanmuCenter) ban(danmu *Danmu, roomID int, reason string) {
 		UserName:  danmu.UserName,
 		RoomID:    roomID,
 		Content:   danmu.Content,
+		CT:        danmu.CT,
 		Timestamp: danmu.Timestamp,
 		Reason:    reason,
 	}

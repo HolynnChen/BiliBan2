@@ -38,15 +38,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&SaveData{})
+	db.AutoMigrate(&SaveData{}, &SystemBanData{})
 
-	banWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
+	localBanWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
+	systemBanWindowFilter := Filter.NewBanWindowFilter(100, 3600, 0.75)
 	banProcess := &CustomBanProcess{
-		db:       db,
-		filter:   banWindowFilter,
-		reporter: Helper.Reporter(env["cookie"].(string), env["csrf"].(string)),
+		db:          db,
+		localFilter: localBanWindowFilter,
+		reporter:    Helper.Reporter(env["cookie"].(string), env["csrf"].(string)),
 	} //创建自定义封禁处理结构体
-	banProcess.Restore(100) //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banProcess.RestoreLocalFilter(100) //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
@@ -56,7 +57,8 @@ func main() {
 	},
 		DanmuCenter.SetPreFilter( //入库前检测
 			Helper.Safe(Filter.NewLenFilter(8).Check),         // 简易长度过滤
-			Helper.Continue(banWindowFilter.UnlockCheck),      // 移除高等级的窗口
+			Helper.Ban(systemBanWindowFilter.MatchCheck),      // 匹配系统确认封禁记录
+			Helper.Continue(localBanWindowFilter.UnlockCheck), // 移除高等级的窗口
 			Helper.Safe(Filter.NewUserLevelFilter(5).Check),   // 过滤掉用户等级>=5的
 			Helper.Safe(Filter.NewFansMedalFilter(3).Check),   // 过滤掉粉丝勋章等级>=3的
 			Helper.Break(Filter.NewHaveBeenBanFilter().Check), // 过滤掉已被Ban的弹幕
@@ -65,7 +67,7 @@ func main() {
 		),
 		DanmuCenter.SetAfterFilter( //入库后检测
 			Helper.Safe(Filter.NewHighReatWordFilter(0.75).Check),             //单字符重复率>0.75视作正常弹幕
-			Helper.Ban(banWindowFilter.MatchCheck),                            //与封禁窗口比较
+			Helper.Ban(localBanWindowFilter.MatchCheck),                       //与封禁窗口比较
 			Helper.Ban(Filter.NewHighSimilarityAndSpeedFilter(0.75, 3).Check), //时间范围内达到startCheck后检测最新几组的相似率
 		),
 		DanmuCenter.SetBanProcess(banProcess), //处理封禁情况
@@ -81,7 +83,7 @@ func main() {
 			}
 			bodyStr := string(body)
 			log.Println("add Window", bodyStr)
-			banWindowFilter.Add(&DanmuCenter.BanData{Content: bodyStr})
+			localBanWindowFilter.Add(bodyStr)
 			io.WriteString(w, "add string ["+bodyStr+"] success")
 		})
 		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
@@ -91,9 +93,10 @@ func main() {
 }
 
 type CustomBanProcess struct {
-	filter   *Filter.BanWindowFilter
-	db       *gorm.DB
-	reporter func(*DanmuCenter.BanData)
+	localFilter  *Filter.BanWindowFilter
+	systemFilter *Filter.BanWindowFilter
+	db           *gorm.DB
+	reporter     func(*DanmuCenter.BanData)
 }
 
 type SaveData struct {
@@ -102,9 +105,15 @@ type SaveData struct {
 	CreatedAt time.Time
 }
 
+type SystemBanData struct {
+	ID        uint   `gorm:"primaryKey"`
+	Content   string `json:"content"`
+	CreatedAt time.Time
+}
+
 func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	log.Printf("%+v\n", banData)
-	process.filter.Add(banData)
+	process.localFilter.Add(banData.Content)
 	//异步掉耗时操作
 	go process.db.Create(&SaveData{
 		Data: *banData,
@@ -113,15 +122,27 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	//go process.reporter(banData)
 }
 
-func (process *CustomBanProcess) Restore(limit int) {
+func (process *CustomBanProcess) RestoreLocalFilter(limit int) {
 	saveDatas := make([]SaveData, 0)
 	err := process.db.Model(&SaveData{}).Where("reason = ?", "时间范围内近似发言过多").Order("created_at desc").Limit(limit).Find(&saveDatas).Error
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("尝试导入%d条频繁发言封禁记录到封禁窗口", len(saveDatas))
+	log.Printf("尝试导入%d条频繁发言封禁记录到本地封禁窗口\n", len(saveDatas))
 	for _, data := range saveDatas {
-		process.filter.Add(&data.Data)
+		process.localFilter.Add(data.Data.Content)
+	}
+}
+
+func (process *CustomBanProcess) RestoreSystemFilter(limit int) {
+	systemBanDatas := make([]SystemBanData, 0)
+	err := process.db.Model(&SystemBanData{}).Order("created_at desc").Limit(limit).Find(&systemBanDatas).Error
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("尝试导入%d条系统确认封禁记录到系统封禁窗口\n", len(systemBanDatas))
+	for _, data := range systemBanDatas {
+		process.localFilter.Add(data.Content)
 	}
 }
 
@@ -130,6 +151,7 @@ type SyncData struct {
 	UserName  string `json:"UserName"`
 	RoomID    int    `json:"RoomId"`
 	Content   string `json:"Content"`
+	CT        string `json:"ct"`
 	TimeStamp int64  `json:"TimeStamp"`
 	Reason    string `json:"Reason"`
 }
@@ -140,6 +162,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 		UserName:  banData.UserName,
 		RoomID:    banData.RoomID,
 		Content:   banData.Content,
+		CT:        banData.CT,
 		TimeStamp: banData.Timestamp,
 		Reason:    banData.Reason,
 	})
