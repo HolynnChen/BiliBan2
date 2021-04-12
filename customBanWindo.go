@@ -73,11 +73,17 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 	if len(queryData) == 0 {
 		return nil
 	}
+	count := 0
 	for i := 0; i < len(queryData); i++ {
 		if queryData[i].Danmaku.Comment != "" {
 			log.Println("尝试同步系统封禁")
-			process.systemFilter.Add(queryData[i].Danmaku.Comment)
+			if success := process.systemFilter.Add(queryData[i].Danmaku.Comment); success {
+				count++
+			}
 		}
+	}
+	if count > 0 {
+		log.Printf("同步系统封禁新增规则%d条\n", count)
 	}
 	process.nowCursorID = queryData[0].CursorID
 	return nil
