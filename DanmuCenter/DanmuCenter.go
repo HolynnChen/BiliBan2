@@ -64,7 +64,9 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	c.DanmuDB.Store(danmu.UserID, append(c.GetRecentDanmu(danmu.UserID), danmu))
 
 	//判断是否异常弹幕
-	c.runFilters(&c.afterFilter, danmu)
+	if ok := c.runFilters(&c.afterFilter, danmu); ok {
+		return
+	}
 }
 
 func (c *DanmuCenter) liveEnd(roomID int) {

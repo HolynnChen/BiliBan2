@@ -7,8 +7,10 @@ require (
 	github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/goccy/go-json v0.4.11
-	github.com/holynnchen/bililive v0.0.0-20210412074546-32b01f59cff4
+	github.com/holynnchen/bililive v0.0.0-20210412103353-e002b6b45e5d
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.3
 )
+
+replace github.com/holynnchen/bililive => /Users/holynnchen/github/bililive
