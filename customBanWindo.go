@@ -76,7 +76,6 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 	count := 0
 	for i := 0; i < len(queryData); i++ {
 		if queryData[i].Danmaku.Comment != "" {
-			log.Println("尝试同步系统封禁")
 			if success := process.systemFilter.Add(queryData[i].Danmaku.Comment); success {
 				count++
 			}
