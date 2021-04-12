@@ -60,11 +60,11 @@ func main() {
 	},
 		DanmuCenter.SetPreFilter( //入库前检测
 			Helper.Safe(Filter.NewLenFilter(8).Check),         // 简易长度过滤
+			Helper.Break(Filter.NewHaveBeenBanFilter().Check), // 过滤掉已被Ban的弹幕
 			Helper.Ban(systemBanWindowFilter.MatchCheck),      // 匹配系统确认封禁记录
 			Helper.Continue(localBanWindowFilter.UnlockCheck), // 移除高等级的窗口
 			Helper.Safe(Filter.NewUserLevelFilter(5).Check),   // 过滤掉用户等级>=5的
 			Helper.Safe(Filter.NewFansMedalFilter(3).Check),   // 过滤掉粉丝勋章等级>=3的
-			Helper.Break(Filter.NewHaveBeenBanFilter().Check), // 过滤掉已被Ban的弹幕
 			// Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢"}),               // 关键词匹配过滤
 			Helper.Safe(Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)).Check), // 过滤掉重复词压缩后长度小于9的弹幕
 		),
