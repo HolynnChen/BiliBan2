@@ -73,7 +73,7 @@ func (c *DanmuCenter) liveEnd(roomID int) {
 }
 
 func (c *DanmuCenter) runFilters(filters *[]Filter, danmu *Danmu) bool {
-	for _, filter := range c.preFilter {
+	for _, filter := range *filters {
 		action, reason := filter(c, danmu)
 		switch action {
 		case Break:
