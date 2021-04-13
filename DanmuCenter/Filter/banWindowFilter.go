@@ -15,6 +15,7 @@ type BanWindowFilter struct {
 	writeMark     int
 	nowSize       int
 	similarity    float32
+	fuzzy         bool
 }
 
 type banWindowData struct {
@@ -29,7 +30,10 @@ func (filter *BanWindowFilter) UnlockCheck(center *DanmuCenter.DanmuCenter, danm
 	if danmu.MedalLevel == 0 && danmu.UserLevel < 3 {
 		return false, ""
 	}
-	content := Utils.ReplaceSimilarAndNumberRune(danmu.Content)
+	content := danmu.Content
+	if filter.fuzzy {
+		content = Utils.ReplaceSimilarAndNumberRune(content)
+	}
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
@@ -48,7 +52,10 @@ func (filter *BanWindowFilter) UnlockCheck(center *DanmuCenter.DanmuCenter, danm
 }
 
 func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	content := Utils.ReplaceSimilarAndNumberRune(danmu.Content)
+	content := danmu.Content
+	if filter.fuzzy {
+		content = Utils.ReplaceSimilarAndNumberRune(content)
+	}
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
@@ -70,7 +77,9 @@ func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu
 }
 
 func (filter *BanWindowFilter) Add(content string) bool {
-	content = Utils.ReplaceSimilarAndNumberRune(content)
+	if filter.fuzzy {
+		content = Utils.ReplaceSimilarAndNumberRune(content)
+	}
 	for i := 1; i < filter.nowSize+1; i++ {
 		banWindowData := filter.banWindow[(filter.writeMark-i+filter.banWindowSize)%filter.banWindowSize]
 		if filter.banWindowTime > 0 && time.Now().Unix()-banWindowData.enableTime > filter.banWindowTime {
@@ -96,7 +105,7 @@ func (filter *BanWindowFilter) Add(content string) bool {
     加入窗口后，要过10s后才会生效
     加入窗口后，若有粉丝勋章等级>0 或 用户等级>=3的相似率大于0.9的发言，那么将禁用此条记录
 */
-func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32) *BanWindowFilter {
+func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32, fuzzy bool) *BanWindowFilter {
 	return &BanWindowFilter{
 		banWindow:     make([]*banWindowData, banWindowSize, banWindowSize),
 		banWindowSize: banWindowSize,
@@ -104,5 +113,6 @@ func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float
 		similarity:    similarity,
 		writeMark:     0,
 		nowSize:       0,
+		fuzzy:         fuzzy,
 	}
 }
