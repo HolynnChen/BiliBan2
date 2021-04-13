@@ -10,5 +10,5 @@ require (
 	github.com/holynnchen/bililive v0.0.0-20210413033834-af9b81f635ac
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.21.3
+	gorm.io/gorm v1.21.7
 )
