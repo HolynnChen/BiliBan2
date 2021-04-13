@@ -46,8 +46,12 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 	return danmuCenter
 }
 
+var danmuPool = sync.Pool{
+	New: func() interface{} { return new(Danmu) },
+}
+
 func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
-	danmu := new(Danmu)
+	danmu := danmuPool.Get().(*Danmu)
 	danmu.RoomID = roomID
 	danmu.UserID = msg.UserID
 	danmu.UserName = msg.UserName
@@ -119,6 +123,9 @@ func (c *DanmuCenter) filterValidDanmu(danmuList []*Danmu, timeRange int64) []*D
 			break
 		}
 	}
+	for i := 0; i < index; i++ {
+		danmuPool.Put(danmuList[i])
+	}
 	return danmuList[index:]
 }
 
@@ -142,6 +149,9 @@ func (c *DanmuCenter) cleanDanmuDB(timeRange int64) {
 				c.DanmuDB.Delete(key)
 				count++
 				all--
+				for i := 0; i < danmuLen; i++ {
+					danmuPool.Put(danmuList[i])
+				}
 			}
 		}
 		return true
