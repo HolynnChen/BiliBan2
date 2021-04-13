@@ -68,7 +68,7 @@ func main() {
 			Helper.Continue(localBanWindowFilter.UnlockCheck),                                    // 移除高等级的窗口
 			Helper.Safe(Filter.NewUserLevelFilter(5).Check),                                      // 过滤掉用户等级>=5的
 			Helper.Safe(Filter.NewFansMedalFilter(3).Check),                                      // 过滤掉粉丝勋章等级>=3的
-			Helper.Safe(Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢", "欢迎"}).Check),         // 关键词匹配过滤
+			Helper.Safe(Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢", "欢迎", "点歌"}).Check),   // 关键词匹配过滤
 			Helper.Ban(localBanWindowFilter.MatchCheck),                                          // 与封禁窗口比较
 		),
 		DanmuCenter.SetAfterFilter( //入库后检测
