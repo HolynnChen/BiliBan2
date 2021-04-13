@@ -39,6 +39,23 @@ func ReplaceSimilarAndNumberRune(rawData string) string {
 	return result
 }
 
+func SimpleReplaceSimilar(rawData string) string {
+	result := strings.Map(func(code rune) rune {
+		if result, ok := replaceDict[code]; ok {
+			code = result
+		}
+		if code == 12288 {
+			return -1
+		}
+		if code > 65280 && code < 65375 {
+			return code - 65248
+		}
+		return code
+	}, rawData)
+	result = replaceSpecial.ReplaceAllString(strings.ToLower(result), "")
+	return result
+}
+
 func CompressRepeatGroup(repeatGroupMinLen int) func(string) string {
 	replaceGroup := regexp2.MustCompile(`(.{`+strconv.Itoa(repeatGroupMinLen)+`,})(?=.*\1)+`, 0)
 	return func(s string) string {

@@ -30,7 +30,7 @@ func (filter *BanWindowFilter) UnlockCheck(center *DanmuCenter.DanmuCenter, danm
 	if danmu.MedalLevel == 0 && danmu.UserLevel < 3 {
 		return false, ""
 	}
-	content := danmu.Content
+	content := Utils.SimpleReplaceSimilar(danmu.Content)
 	if filter.fuzzy {
 		content = Utils.ReplaceSimilarAndNumberRune(content)
 	}
@@ -52,7 +52,7 @@ func (filter *BanWindowFilter) UnlockCheck(center *DanmuCenter.DanmuCenter, danm
 }
 
 func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu *DanmuCenter.Danmu) (bool, string) {
-	content := danmu.Content
+	content := Utils.SimpleReplaceSimilar(danmu.Content)
 	if filter.fuzzy {
 		content = Utils.ReplaceSimilarAndNumberRune(content)
 	}
@@ -77,6 +77,7 @@ func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu
 }
 
 func (filter *BanWindowFilter) Add(content string) bool {
+	content = Utils.SimpleReplaceSimilar(content)
 	if filter.fuzzy {
 		content = Utils.ReplaceSimilarAndNumberRune(content)
 	}
