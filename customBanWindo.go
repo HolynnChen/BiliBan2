@@ -90,8 +90,10 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 
 func (process *CustomBanProcess) TimingUpdataSystemFilter(d time.Duration) {
 	ticker := time.NewTicker(d)
-	select {
-	case <-ticker.C:
-		go process.UpdateSystemFilter()
+	for {
+		select {
+		case <-ticker.C:
+			go process.UpdateSystemFilter()
+		}
 	}
 }
