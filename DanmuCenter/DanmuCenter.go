@@ -46,12 +46,8 @@ func NewDanmuCenter(config *DanmuCenterConfig, options ...DanmuCenterOption) *Da
 	return danmuCenter
 }
 
-var danmuPool = sync.Pool{
-	New: func() interface{} { return new(Danmu) },
-}
-
 func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
-	danmu := danmuPool.Get().(*Danmu)
+	danmu := new(Danmu)
 	danmu.RoomID = roomID
 	danmu.UserID = msg.UserID
 	danmu.UserName = msg.UserName
@@ -61,7 +57,6 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	danmu.Content = msg.Content
 	danmu.CT = msg.CT
 	danmu.Timestamp = msg.Timestamp
-	defer danmuPool.Put(danmu)
 
 	//是否入库前检测
 	if ok := c.runFilters(&c.preFilter, danmu); ok {
