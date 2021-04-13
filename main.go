@@ -62,7 +62,7 @@ func main() {
 			Helper.Safe(Filter.NewLenFilter(8).Check),                                            // 简易长度过滤
 			Helper.Safe(Filter.NewAdminFilter().Check),                                           // 过滤掉房管
 			Helper.Break(Filter.NewHaveBeenBanFilter().Check),                                    // 过滤掉已被Ban的弹幕
-			Helper.Safe(Filter.NewHighReatWordFilter(0.75).Check),                                // 单字符重复率>0.75视作正常弹幕
+			Helper.Safe(Filter.NewHighReatWordFilter(0.5).Check),                                 // 单字符重复率>0.75视作正常弹幕
 			Helper.Safe(Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(3)).Check), // 过滤掉重复词压缩后长度小于9的弹幕
 			Helper.Ban(systemBanWindowFilter.MatchCheck),                                         // 匹配系统确认封禁记录
 			Helper.Continue(localBanWindowFilter.UnlockCheck),                                    // 移除高等级的窗口
