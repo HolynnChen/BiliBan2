@@ -24,22 +24,30 @@ type Data struct {
 }
 
 func GetTopRoom(max int) ([]int, error) {
-	resp, err := http.Get("https://api.live.bilibili.com/room/v1/Area/getListByAreaID?areaId=0&sort=online&pageSize=" + strconv.Itoa(max) + "&page=1")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var result = new(TopRoomResponse)
-	if err := json.Unmarshal(body, result); err != nil {
-		return nil, err
-	}
 	var roomIDs []int
-	for _, room := range result.Data {
-		roomIDs = append(roomIDs, room.Roomid)
+	page := 1
+	for max > 0 {
+		resp, err := http.Get("https://api.live.bilibili.com/room/v1/Area/getListByAreaID?areaId=0&sort=online&pageSize=200&page=" + strconv.Itoa(page))
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		var result = new(TopRoomResponse)
+		if err := json.Unmarshal(body, result); err != nil {
+			return nil, err
+		}
+		for _, room := range result.Data {
+			if max <= 0 {
+				break
+			}
+			roomIDs = append(roomIDs, room.Roomid)
+			max--
+		}
+		page++
 	}
 	return roomIDs, nil
 }

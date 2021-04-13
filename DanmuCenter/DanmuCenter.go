@@ -195,7 +195,7 @@ func (c *DanmuCenter) updateRoom(monitorNumber int) error {
 
 func (c *DanmuCenter) tickerTask() {
 	tickerCleanDanmu := time.NewTicker(time.Minute)
-	tickerUpdateRoom := time.NewTicker(time.Minute)
+	tickerUpdateRoom := time.NewTicker(3 * time.Minute)
 	for {
 		select {
 		case <-context.Background().Done():
