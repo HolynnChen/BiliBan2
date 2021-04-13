@@ -43,6 +43,7 @@ type Danmu struct {
 	RoomID     int    // 房间id
 	UserName   string // 用户名
 	UserLevel  int    // 用户等级
+	IsAdmin    bool   // 是否房管
 	MedalLevel int    // 勋章等级
 	Content    string // 弹幕内容
 	CT         string // 弹幕token

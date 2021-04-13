@@ -60,6 +60,7 @@ func main() {
 	},
 		DanmuCenter.SetPreFilter( //入库前检测
 			Helper.Safe(Filter.NewLenFilter(8).Check),                                            // 简易长度过滤
+			Helper.Safe(Filter.NewAdminFilter().Check),                                           // 过滤掉房管
 			Helper.Break(Filter.NewHaveBeenBanFilter().Check),                                    // 过滤掉已被Ban的弹幕
 			Helper.Ban(systemBanWindowFilter.MatchCheck),                                         // 匹配系统确认封禁记录
 			Helper.Continue(localBanWindowFilter.UnlockCheck),                                    // 移除高等级的窗口

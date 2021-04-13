@@ -55,6 +55,7 @@ func (c *DanmuCenter) liveReceiveMsg(roomID int, msg *bililive.MsgModel) {
 	danmu.RoomID = roomID
 	danmu.UserID = msg.UserID
 	danmu.UserName = msg.UserName
+	danmu.IsAdmin = msg.IsAdmin
 	danmu.UserLevel = msg.UserLevel
 	danmu.MedalLevel = msg.MedalLevel
 	danmu.Content = msg.Content

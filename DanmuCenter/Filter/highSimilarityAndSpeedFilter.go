@@ -1,6 +1,8 @@
 package Filter
 
 import (
+	"log"
+
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
 )
@@ -21,6 +23,7 @@ func (filter *HighSimilarityAndSpeedFilter) Check(center *DanmuCenter.DanmuCente
 	for i := 1; i < dataLen; i++ {
 		allCompare = (allCompare*float32(i-1) + Utils.GetSimilarity(danmuList[dataLen-i].Content, danmuList[dataLen-i-1].Content)) / float32(i)
 		if i > filter.startCheck-1 && allCompare > filter.similarity {
+			log.Printf("%+v\n",danmuList)
 			return true, "时间范围内近似发言过多"
 		}
 	}
