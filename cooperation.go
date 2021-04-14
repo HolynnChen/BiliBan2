@@ -102,11 +102,18 @@ type ProxyResponse struct {
 	Type       string `json:"type"`
 }
 
-var reqTime = time.Now().Unix()
+var reqTimeLimit = time.Now().Unix()
+
+func maxInt(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 func getProxy() func(*http.Request) (*url.URL, error) {
-	if time.Now().Unix()-reqTime >= 3 {
-		reqTime = time.Now().Unix()
+	if reqTimeLimit-time.Now().Unix() <= 60 {
+		reqTimeLimit = maxInt(time.Now().Unix(), reqTimeLimit) + 3
 		return nil // 低频下用自己ip
 	}
 	resp, err := http.DefaultClient.Get(env["proxy_url"].(string))
