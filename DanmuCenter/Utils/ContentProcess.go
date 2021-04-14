@@ -50,6 +50,15 @@ func SimpleReplaceSimilar(rawData string) string {
 		if code > 65280 && code < 65375 {
 			return code - 65248
 		}
+		if code >= 0x2460 && code <= 0x249b ||
+			code >= 0x3220 && code <= 0x3229 ||
+			code >= 0x3248 && code <= 0x324f ||
+			code >= 0x3251 && code <= 0x325f ||
+			code >= 0x3280 && code <= 0x3289 ||
+			code >= 0x32b1 && code <= 0x32bf ||
+			code >= 0xff10 && code <= 0xff19 {
+			return '#'
+		}
 		return code
 	}, rawData)
 	result = replaceSpecial.ReplaceAllString(strings.ToLower(result), "")
