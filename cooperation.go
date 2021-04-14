@@ -119,7 +119,6 @@ func getProxy() func(*http.Request) (*url.URL, error) {
 		log.Println(err)
 		return nil
 	}
-	log.Println(result.Proxy)
 	proxyUrl, err := url.Parse("http://" + result.Proxy)
 	if err != nil {
 		log.Println(err)
