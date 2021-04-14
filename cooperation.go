@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/goccy/go-json"
@@ -101,7 +102,13 @@ type ProxyResponse struct {
 	Type       string `json:"type"`
 }
 
+var reqTime = time.Now().Unix()
+
 func getProxy() func(*http.Request) (*url.URL, error) {
+	if time.Now().Unix()-reqTime >= 3 {
+		reqTime = time.Now().Unix()
+		return nil // 低频下用自己ip
+	}
 	resp, err := http.DefaultClient.Get(env["proxy_url"].(string))
 	if err != nil {
 		log.Println(err)
