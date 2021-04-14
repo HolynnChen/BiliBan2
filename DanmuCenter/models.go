@@ -1,6 +1,8 @@
 package DanmuCenter
 
 import (
+	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Utils"
@@ -84,5 +86,11 @@ func SetFilter(filters ...Filter) DanmuCenterOption {
 func SetBanProcess(process BanProcess) DanmuCenterOption {
 	return func(center *DanmuCenter) {
 		center.banProcess = process
+	}
+}
+
+func SetProxy(proxyFunc func() func(*http.Request) (*url.URL, error)) DanmuCenterOption {
+	return func(center *DanmuCenter) {
+		center.Live.Proxy = proxyFunc
 	}
 }

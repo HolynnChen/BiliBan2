@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/goccy/go-json"
@@ -87,4 +88,42 @@ func queryBan(CursorID int64) ([]QueryBanData, error) {
 		}
 	}
 	return []QueryBanData{}, nil
+}
+
+type ProxyResponse struct {
+	CheckCount int    `json:"check_count"`
+	FailCount  int    `json:"fail_count"`
+	LastStatus int    `json:"last_status"`
+	LastTime   string `json:"last_time"`
+	Proxy      string `json:"proxy"`
+	Region     string `json:"region"`
+	Source     string `json:"source"`
+	Type       string `json:"type"`
+}
+
+func getProxy() func(*http.Request) (*url.URL, error) {
+	resp, err := http.DefaultClient.Get(env["proxy_url"].(string))
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	var result ProxyResponse
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	log.Println(result.Proxy)
+	proxyUrl, err := url.Parse("http://" + result.Proxy)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return http.ProxyURL(proxyUrl)
 }

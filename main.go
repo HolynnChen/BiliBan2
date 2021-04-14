@@ -54,10 +54,11 @@ func main() {
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
-		MonitorNumber:  1000,
+		MonitorNumber:  400,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
+		DanmuCenter.SetProxy(getProxy), // 设置代理
 		DanmuCenter.SetPreFilter( //入库前检测
 			Helper.Safe(Filter.NewLenFilter(8).Check),                                            // 简易长度过滤
 			Helper.Safe(Filter.NewAdminFilter().Check),                                           // 过滤掉房管
