@@ -2,12 +2,15 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
@@ -45,7 +48,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 }
 
 type QueryBanRequest struct {
-	// CursorID int64 `json:"CursorId"`
+	CursorID int64 `json:"CursorId"`
 }
 
 type QueryBanResponse struct {
@@ -63,7 +66,7 @@ type QueryBanData struct {
 
 func queryBan(CursorID int64) ([]QueryBanData, error) {
 	jsonData, _ := json.Marshal(QueryBanRequest{
-		// CursorID: CursorID,
+		CursorID: CursorID,
 	})
 	resp, err := http.DefaultClient.Post(env["query_url"].(string), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -111,25 +114,30 @@ func maxInt(a, b int64) int64 {
 	return b
 }
 
+func httpGet(url string, out interface{}) error {
+	resp, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func getProxy() func(*http.Request) (*url.URL, error) {
 	if reqTimeLimit-time.Now().Unix() <= 60 {
 		reqTimeLimit = maxInt(time.Now().Unix(), reqTimeLimit) + 3
 		return nil // 低频下用自己ip
 	}
-	resp, err := http.DefaultClient.Get(env["proxy_url"].(string))
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
 	var result ProxyResponse
-	err = json.Unmarshal(body, &result)
-	if err != nil {
+	if err := httpGet(env["proxy_url"].(string), &result); err != nil {
 		log.Println(err)
 		return nil
 	}
@@ -139,4 +147,76 @@ func getProxy() func(*http.Request) (*url.URL, error) {
 		return nil
 	}
 	return http.ProxyURL(proxyUrl)
+}
+
+type proxyPool struct {
+	proxys []string
+}
+
+type getProxyResp struct {
+	Proxy string `json:"proxy"`
+}
+
+func (p *proxyPool) Get() func(*http.Request) (*url.URL, error) {
+	proxyUrl, _ := url.Parse("http://" + p.proxys[rand.Intn(len(p.proxys))])
+	return http.ProxyURL(proxyUrl)
+}
+
+func (p *proxyPool) Sync() {
+	var resp = make([]getProxyResp, 0)
+	if err := httpGet(env["proxy_all_url"].(string), &resp); err != nil {
+		log.Println(err)
+		return
+	}
+	tmp := p.proxys
+	for _, i := range resp {
+		tmp = append(tmp, i.Proxy)
+	}
+	result := make([]string, 0)
+	var wg sync.WaitGroup
+	for _, i := range tmp {
+		wg.Add(1)
+		go func(proxy string) {
+			if p.Check(proxy) {
+				tmp = append(tmp, proxy)
+			}
+			defer wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	if len(result) > 0 {
+		result = result[:100]
+	}
+	p.proxys = result
+}
+
+type biliIpResp struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (p *proxyPool) Check(proxy string) bool {
+	var rsp biliIpResp
+	proxyUrl, _ := url.Parse("http://" + proxy)
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy:           http.ProxyURL(proxyUrl),
+	}, Timeout: 10 * time.Second}
+	resp, err := client.Get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false
+	}
+	err = json.Unmarshal(body, &rsp)
+	if err != nil {
+		return false
+	}
+	if rsp.Code != 0 {
+		return false
+	}
+	return true
 }
