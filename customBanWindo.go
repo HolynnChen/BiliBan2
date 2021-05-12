@@ -75,7 +75,7 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 	}
 	count := 0
 	for i := 0; i < len(queryData); i++ {
-		if queryData[i].Danmaku.Comment != "" {
+		if queryData[i].Reason == "垃圾广告" && queryData[i].Danmaku.Comment != "" {
 			if success := process.systemFilter.Add(queryData[i].Danmaku.Comment); success {
 				count++
 			}

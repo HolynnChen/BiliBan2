@@ -58,7 +58,8 @@ type QueryBanResponse struct {
 }
 
 type QueryBanData struct {
-	CursorID int64 `json:"CursorId"`
+	CursorID int64  `json:"CursorId"`
+	Reason   string `json:"Reason"`
 	Danmaku  struct {
 		Comment string `json:"Comment"`
 	} `json:"Danmaku"`
