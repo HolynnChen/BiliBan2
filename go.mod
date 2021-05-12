@@ -7,7 +7,7 @@ require (
 	github.com/TheFutureIsOurs/ahocorasick v0.0.0-20210127025413-575fb905ba8d
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/goccy/go-json v0.5.0
-	github.com/holynnchen/bililive v0.0.0-20210512131647-a0c1bbc4ed58
+	github.com/holynnchen/bililive v0.0.0-20210512170756-91f51bde33fe
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.7
