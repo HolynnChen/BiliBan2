@@ -9,6 +9,7 @@ require (
 	github.com/goccy/go-json v0.5.0
 	github.com/holynnchen/bililive v0.0.0-20210514155710-e59ea6c7eb49
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
+	gorm.io/driver/mysql v1.0.6
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.21.7
+	gorm.io/gorm v1.21.9
 )

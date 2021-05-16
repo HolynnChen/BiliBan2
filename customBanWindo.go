@@ -15,7 +15,7 @@ type CustomBanProcess struct {
 	db           *gorm.DB
 	reporter     func(*DanmuCenter.BanData)
 
-	nowCursorID int64
+	nowID int64
 }
 type SaveData struct {
 	ID        uint                `gorm:"primaryKey"`
@@ -65,7 +65,7 @@ func (process *CustomBanProcess) RestoreSystemFilter(limit int) {
 }
 
 func (process *CustomBanProcess) UpdateSystemFilter() error {
-	queryData, err := queryBan(process.nowCursorID)
+	queryData, err := queryBan(process.nowID)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -84,7 +84,7 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 	if count > 0 {
 		log.Printf("同步系统封禁新增规则%d条\n", count)
 	}
-	process.nowCursorID = queryData[0].CursorID
+	process.nowID = queryData[0].ID
 	return nil
 }
 

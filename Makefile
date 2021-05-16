@@ -15,3 +15,11 @@ release:
 	@rm -f ./build/main
 	@go build -o ./build/main .
 	@echo "Done! Build finish!"
+
+linux:
+	@echo "Building BiliBan..."
+	@mkdir -p ./build
+	@go clean
+	@rm -f ./build/main
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/main .
+	@echo "Done! Build finish!"

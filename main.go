@@ -12,6 +12,7 @@ import (
 	"github.com/Holynnchen/BiliBan2/DanmuCenter"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Filter"
 	"github.com/Holynnchen/BiliBan2/DanmuCenter/Helper"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -19,7 +20,7 @@ import (
 	"net/http"
 )
 
-var env = make(map[string]interface{})
+var env = make(map[string]string)
 
 func init() {
 	if _, err := os.Stat("env.toml"); err != nil {
@@ -31,8 +32,13 @@ func init() {
 	fmt.Printf("变量值: %+v\n", env)
 }
 
+var dbType = map[string]func(string) gorm.Dialector{
+	"sqlite": sqlite.Open,
+	"mysql":  mysql.Open,
+}
+
 func main() {
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	db, err := gorm.Open(dbType[env["db_type"]](env["db_ddns"]), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +50,7 @@ func main() {
 		db:           db,
 		localFilter:  localBanWindowFilter,
 		systemFilter: systemBanWindowFilter,
-		reporter:     Helper.Reporter(env["cookie"].(string), env["csrf"].(string)),
+		reporter:     Helper.Reporter(env["cookie"], env["csrf"]),
 	} //创建自定义封禁处理结构体
 	banProcess.RestoreLocalFilter(100) //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
 	if err := banProcess.UpdateSystemFilter(); err != nil {

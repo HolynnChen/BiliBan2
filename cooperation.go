@@ -37,7 +37,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 		TimeStamp: banData.Timestamp,
 		Reason:    banData.Reason,
 	})
-	resp, err := http.DefaultClient.Post(env["sync_url"].(string), "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.DefaultClient.Post(env["sync_url"], "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Println(err)
 		return
@@ -48,7 +48,7 @@ func syncBan(banData *DanmuCenter.BanData) {
 }
 
 type QueryBanRequest struct {
-	CursorID int64 `json:"CursorId"`
+	ID int64 `json:"Id"`
 }
 
 type QueryBanResponse struct {
@@ -58,18 +58,18 @@ type QueryBanResponse struct {
 }
 
 type QueryBanData struct {
-	CursorID int64  `json:"CursorId"`
-	Reason   string `json:"Reason"`
-	Danmaku  struct {
+	ID      int64  `json:"Id"`
+	Reason  string `json:"Reason"`
+	Danmaku struct {
 		Comment string `json:"Comment"`
 	} `json:"Danmaku"`
 }
 
-func queryBan(CursorID int64) ([]QueryBanData, error) {
+func queryBan(ID int64) ([]QueryBanData, error) {
 	jsonData, _ := json.Marshal(QueryBanRequest{
-		CursorID: CursorID,
+		ID: ID,
 	})
-	resp, err := http.DefaultClient.Post(env["query_url"].(string), "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.DefaultClient.Post(env["query_url"], "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -88,7 +88,7 @@ func queryBan(CursorID int64) ([]QueryBanData, error) {
 		return nil, errors.New(result.Msg)
 	}
 	for index := 0; index < len(result.Data); index++ {
-		if result.Data[index].CursorID > CursorID {
+		if result.Data[index].ID > ID {
 			return result.Data[index:], nil
 		}
 	}
@@ -138,7 +138,7 @@ func getProxy() func(*http.Request) (*url.URL, error) {
 		return nil // 低频下用自己ip
 	}
 	var result ProxyResponse
-	if err := httpGet(env["proxy_url"].(string), &result); err != nil {
+	if err := httpGet(env["proxy_url"], &result); err != nil {
 		log.Println(err)
 		return nil
 	}
@@ -165,7 +165,7 @@ func (p *proxyPool) Get() func(*http.Request) (*url.URL, error) {
 
 func (p *proxyPool) Sync() {
 	var resp = make([]getProxyResp, 0)
-	if err := httpGet(env["proxy_all_url"].(string), &resp); err != nil {
+	if err := httpGet(env["proxy_all_url"], &resp); err != nil {
 		log.Println(err)
 		return
 	}
