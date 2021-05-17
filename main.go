@@ -52,7 +52,8 @@ func main() {
 		systemFilter: systemBanWindowFilter,
 		reporter:     Helper.Reporter(env["cookie"], env["csrf"]),
 	} //创建自定义封禁处理结构体
-	banProcess.RestoreLocalFilter(100) //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banProcess.RestoreLocalFilter(100)  //从数据库恢复最多100条因频繁发言封禁的记录导入到窗口
+	banProcess.RestoreSystemFilter(100) //从数据库恢复最多100条系统封禁的记录导入到窗口
 	if err := banProcess.UpdateSystemFilter(); err != nil {
 		log.Fatal(err)
 	}
