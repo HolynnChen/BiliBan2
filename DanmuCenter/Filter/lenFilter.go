@@ -35,6 +35,6 @@ func NewLenFilter(lenTarget int, options ...lenFilterOption) *LenFilter {
 
 func SetLenFilterCompressRepeatGroup(minLen int) lenFilterOption {
 	return func(lf *LenFilter) {
-		lf.repeatGroupCompress = Utils.CompressRepeatGroup(minLen)
+		lf.repeatGroupCompress = Utils.CompressRepeatGroup2(minLen)
 	}
 }
