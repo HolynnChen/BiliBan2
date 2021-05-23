@@ -129,6 +129,8 @@ type UTF8StringSuffixArray struct {
 	source []rune
 	len    int
 	stack  *Stack
+	//辅助工具
+	sortBuff []int
 }
 
 func (s *UTF8StringSuffixArray) Len() int {
@@ -203,19 +205,27 @@ func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) []rune {
 	area := 0
 	left := 0
 	h := 0
+	tmpLeft := 0
+	tmpArea := 0
 	s.stack.MustPush(0)
 	for i := 1; i < s.len+1; i++ { //len+1是因为额外占用掉一个height最后的空
 		for s.height[s.stack.MustPeek().(int)] > s.height[i] {
 			height := s.height[s.stack.MustPop().(int)]
 			width := i - 1 - s.stack.MustPeek().(int)
-			tmpArea := 0
-			if height >= minLen && width > 1 {
-				for j := i - width + height; j < i; j += height {
-					tmpArea += height
+			if height >= minLen {
+				copy(s.sortBuff, s.sa[i-width-1:i])
+				quickSort(s.sortBuff, 0, width)
+				tmpLeft = s.sortBuff[0]
+				tmpArea = 0
+				for j := 1; j < width+1; j++ {
+					if s.sortBuff[j]-tmpLeft >= height {
+						tmpLeft = s.sortBuff[j]
+						tmpArea += height
+					}
 				}
 				if tmpArea > area {
 					h = height
-					left = i - width
+					left = tmpLeft
 					area = tmpArea
 				}
 			}
@@ -223,16 +233,17 @@ func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) []rune {
 		s.stack.MustPush(i)
 	}
 	s.stack.Empty()
-	return s.source[s.sa[left] : s.sa[left]+h]
+	return s.source[left : left+h]
 }
 
 //反正就短弹幕，直接限制最大输入长度为63
 func NewUTF8StringSuffixArray() *UTF8StringSuffixArray {
 	return &UTF8StringSuffixArray{
-		source: make([]rune, 64),
-		sa:     make([]int, 64),
-		rank:   make([]int, 64),
-		height: make([]int, 64),
-		stack:  NewStack(64),
+		source:   make([]rune, 64),
+		sa:       make([]int, 64),
+		rank:     make([]int, 64),
+		height:   make([]int, 64),
+		sortBuff: make([]int, 64),
+		stack:    NewStack(64),
 	}
 }
