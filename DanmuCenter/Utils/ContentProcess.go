@@ -88,6 +88,7 @@ func CompressRepeatGroup(repeatGroupMinLen int) func(string) string {
 func CompressRepeatGroup2(repeatGroupMinLen int) func(string) string {
 	operator := NewUTF8StringSuffixArray()
 	var buffer bytes.Buffer
+	var wordBuffer bytes.Buffer
 	return func(s string) string {
 		buffer.Reset()
 		buffer.WriteString(s)
@@ -95,11 +96,15 @@ func CompressRepeatGroup2(repeatGroupMinLen int) func(string) string {
 			value := buffer.Bytes()
 			operator.Init(bytes2str(value))
 			word := operator.MaxAreaString(repeatGroupMinLen)
-			if word == "" {
+			if len(word) == 0 {
 				return bytes2str(value)
 			}
-			sWord := str2bytes(word)
+			wordBuffer.Reset()
 			buffer.Reset()
+			for _, r := range word {
+				wordBuffer.WriteRune(r)
+			}
+			sWord := wordBuffer.Bytes()
 			start := 0
 			for {
 				if p := bytes.Index(value[start:], sWord); p > -1 {
@@ -191,9 +196,9 @@ func (s *UTF8StringSuffixArray) Init(str string) {
 	s.height[s.len] = 0
 }
 
-func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) string {
+func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) []rune {
 	if s.len <= 1 {
-		return string(s.source[:1])
+		return s.source[:0]
 	}
 	area := 0
 	left := 0
@@ -218,7 +223,7 @@ func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) string {
 		s.stack.MustPush(i)
 	}
 	s.stack.Empty()
-	return string(s.source[s.sa[left] : s.sa[left]+h])
+	return s.source[s.sa[left] : s.sa[left]+h]
 }
 
 //反正就短弹幕，直接限制最大输入长度为63
