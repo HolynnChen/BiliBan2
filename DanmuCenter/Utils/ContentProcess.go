@@ -103,7 +103,6 @@ func CompressRepeatGroup2(repeatGroupMinLen int) func(string) string {
 			start := 0
 			for {
 				if p := bytes.Index(value[start:], sWord); p > -1 {
-
 					buffer.Write(value[start : start+p])
 					if start == 0 {
 						buffer.Write(sWord)
@@ -134,7 +133,10 @@ func (s *UTF8StringSuffixArray) Len() int {
 func (s *UTF8StringSuffixArray) Less(i, j int) bool {
 	len_i := s.len - s.sa[i]
 	len_j := s.len - s.sa[j]
-	len_min := min(len_i, len_j)
+	len_min := len_i
+	if len_j < len_min {
+		len_min = len_j
+	}
 	for k := 0; k < len_min; k++ {
 		if s.source[s.sa[i]+k] == s.source[s.sa[j]+k] {
 			continue
@@ -201,14 +203,10 @@ func (s *UTF8StringSuffixArray) MaxAreaString(minLen int) string {
 		for s.height[s.stack.MustPeek().(int)] > s.height[i] {
 			height := s.height[s.stack.MustPop().(int)]
 			width := i - 1 - s.stack.MustPeek().(int)
-			tmpLeft := i - width
 			tmpArea := 0
 			if height >= minLen && width > 1 {
-				for j := tmpLeft; j < i; j++ {
-					if j-tmpLeft >= height {
-						tmpLeft = j
-						tmpArea += height
-					}
+				for j := i - width + height; j < i; j += height {
+					tmpArea += height
 				}
 				if tmpArea > area {
 					h = height

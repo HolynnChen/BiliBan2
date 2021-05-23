@@ -20,14 +20,14 @@ func TestTry(t *testing.T) {
 	fmt.Println(CompressRepeatGroup2(2)(s))
 }
 
-func BenchmarkCompress1(b *testing.B) {
-	s := `\秋絵/♫\秋絵/♫mp\秋絵/♫\秋絵/♫\秋絵/♫qoc\秋絵/♫\秋絵/♫usm\秋絵/♫\秋絵/♫\秋絵/`
-	compressor := CompressRepeatGroup(2)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		compressor(s)
-	}
-}
+// func BenchmarkCompress1(b *testing.B) {
+// 	s := `\秋絵/♫\秋絵/♫mp\秋絵/♫\秋絵/♫\秋絵/♫qoc\秋絵/♫\秋絵/♫usm\秋絵/♫\秋絵/♫\秋絵/`
+// 	compressor := CompressRepeatGroup(2)
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+// 		compressor(s)
+// 	}
+// }
 
 func BenchmarkCompress2(b *testing.B) {
 	s := `\秋絵/♫\秋絵/♫mp\秋絵/♫\秋絵/♫\秋絵/♫qoc\秋絵/♫\秋絵/♫usm\秋絵/♫\秋絵/♫\秋絵/`
