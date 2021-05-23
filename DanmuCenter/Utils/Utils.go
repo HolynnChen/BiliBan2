@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"unicode/utf8"
+	"unsafe"
 
 	"github.com/goccy/go-json"
 )
@@ -160,6 +161,15 @@ func min(a int, args ...int) int {
 	return a
 }
 
+func max(a int, args ...int) int {
+	for _, b := range args {
+		if b > a {
+			a = b
+		}
+	}
+	return a
+}
+
 func maxFloat32(a float32, args ...float32) float32 {
 	for _, b := range args {
 		if b > a {
@@ -167,4 +177,71 @@ func maxFloat32(a float32, args ...float32) float32 {
 		}
 	}
 	return a
+}
+
+type Stack struct {
+	size      int
+	max       int
+	container []interface{}
+}
+
+func NewStack(max int) *Stack {
+	return &Stack{
+		size:      0,
+		max:       max,
+		container: make([]interface{}, max),
+	}
+}
+
+func (s *Stack) MustPush(item interface{}) {
+	s.size++
+	s.container[s.size-1] = item
+}
+func (s *Stack) Push(item interface{}) bool {
+	if s.size >= s.max {
+		return false
+	}
+	s.MustPush(item)
+	return true
+}
+
+func (s *Stack) MustPeek() interface{} {
+	return s.container[s.size-1]
+}
+
+func (s *Stack) Peek() (interface{}, bool) {
+	if s.size <= 0 {
+		return nil, false
+	}
+	return s.MustPeek(), true
+}
+
+func (s *Stack) MustPop() interface{} {
+	s.size--
+	return s.container[s.size]
+}
+
+func (s *Stack) Pop() (interface{}, bool) {
+	if s.size <= 0 {
+		return nil, false
+	}
+	return s.MustPop(), true
+}
+
+func (s *Stack) Size() int {
+	return s.size
+}
+
+func (s *Stack) Empty() {
+	s.size = 0
+}
+
+func str2bytes(s string) []byte {
+	x := (*[2]uintptr)(unsafe.Pointer(&s))
+	b := [3]uintptr{x[0], x[1], x[1]}
+	return *(*[]byte)(unsafe.Pointer(&b))
+}
+
+func bytes2str(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }
