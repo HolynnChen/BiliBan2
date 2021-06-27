@@ -12,6 +12,7 @@ type BanWindowFilter struct {
 	banWindow     []*banWindowData
 	banWindowSize int
 	banWindowTime int64
+	maxBanTimes   int
 	writeMark     int
 	nowSize       int
 	similarity    float32
@@ -20,6 +21,7 @@ type BanWindowFilter struct {
 
 type banWindowData struct {
 	banString  string
+	banTimes   int
 	enableTime int64
 	disable    bool
 }
@@ -64,9 +66,13 @@ func (filter *BanWindowFilter) MatchCheck(center *DanmuCenter.DanmuCenter, danmu
 		if banWindowData.enableTime > time.Now().Unix() {
 			continue
 		}
+		if filter.maxBanTimes > 0 && banWindowData.banTimes >= filter.maxBanTimes {
+			continue
+		}
 		similarity := Utils.GetSimilarity(banWindowData.banString, content)
 		if !banWindowData.disable && similarity > filter.similarity {
 			banWindowData.enableTime = time.Now().Unix() //时间续期
+			banWindowData.banTimes++                     //封禁次数增加
 			return true, "匹配封禁窗口【" + banWindowData.banString + "】"
 		}
 		if banWindowData.disable && similarity > hightSaveCheck {
@@ -90,7 +96,7 @@ func (filter *BanWindowFilter) Add(content string) bool {
 			return false
 		}
 	}
-	filter.banWindow[filter.writeMark] = &banWindowData{banString: content, enableTime: time.Now().Unix() + 10, disable: false}
+	filter.banWindow[filter.writeMark] = &banWindowData{banString: content, banTimes: 0, enableTime: time.Now().Unix() + 10, disable: false}
 	log.Printf("加入窗口 %+v\n", filter.banWindow[filter.writeMark])
 	filter.writeMark = (filter.writeMark + 1) % filter.banWindowSize
 	if filter.nowSize < filter.banWindowSize {
@@ -106,12 +112,13 @@ func (filter *BanWindowFilter) Add(content string) bool {
     加入窗口后，要过10s后才会生效
     加入窗口后，若有粉丝勋章等级>0 或 用户等级>=3的相似率大于0.9的发言，那么将禁用此条记录
 */
-func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32, fuzzy bool) *BanWindowFilter {
+func NewBanWindowFilter(banWindowSize int, banWindowTime int64, similarity float32, maxBanTimes int, fuzzy bool) *BanWindowFilter {
 	return &BanWindowFilter{
-		banWindow:     make([]*banWindowData, banWindowSize, banWindowSize),
+		banWindow:     make([]*banWindowData, banWindowSize),
 		banWindowSize: banWindowSize,
 		banWindowTime: banWindowTime,
 		similarity:    similarity,
+		maxBanTimes:   maxBanTimes,
 		writeMark:     0,
 		nowSize:       0,
 		fuzzy:         fuzzy,

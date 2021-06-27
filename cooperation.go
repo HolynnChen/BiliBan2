@@ -17,6 +17,7 @@ import (
 	"github.com/goccy/go-json"
 )
 
+// SyncData 同步数据格式
 type SyncData struct {
 	UserID    int64  `json:"UserId"`
 	UserName  string `json:"UserName"`
@@ -47,16 +48,19 @@ func syncBan(banData *DanmuCenter.BanData) {
 	fmt.Println(string(body))
 }
 
+// QueryBanRequest 查询封禁请求
 type QueryBanRequest struct {
 	ID int64 `json:"Id"`
 }
 
+// QueryBanResponse 查询封禁返回结构
 type QueryBanResponse struct {
 	Code int            `json:"code"`
 	Msg  string         `json:"msg"`
 	Data []QueryBanData `json:"data"`
 }
 
+// QueryBanData 查询封禁返回数据
 type QueryBanData struct {
 	ID      int64  `json:"Id"`
 	Reason  string `json:"Reason"`
@@ -95,6 +99,7 @@ func queryBan(ID int64) ([]QueryBanData, error) {
 	return []QueryBanData{}, nil
 }
 
+// ProxyResponse 代理返回结构
 type ProxyResponse struct {
 	CheckCount int    `json:"check_count"`
 	FailCount  int    `json:"fail_count"`
@@ -142,12 +147,12 @@ func getProxy() func(*http.Request) (*url.URL, error) {
 		log.Println(err)
 		return nil
 	}
-	proxyUrl, err := url.Parse("http://" + result.Proxy)
+	proxyURL, err := url.Parse("http://" + result.Proxy)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	return http.ProxyURL(proxyUrl)
+	return http.ProxyURL(proxyURL)
 }
 
 type proxyPool struct {
@@ -159,8 +164,8 @@ type getProxyResp struct {
 }
 
 func (p *proxyPool) Get() func(*http.Request) (*url.URL, error) {
-	proxyUrl, _ := url.Parse("http://" + p.proxys[rand.Intn(len(p.proxys))])
-	return http.ProxyURL(proxyUrl)
+	proxyURL, _ := url.Parse("http://" + p.proxys[rand.Intn(len(p.proxys))])
+	return http.ProxyURL(proxyURL)
 }
 
 func (p *proxyPool) Sync() {
@@ -191,17 +196,17 @@ func (p *proxyPool) Sync() {
 	p.proxys = result
 }
 
-type biliIpResp struct {
+type biliIPResp struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 func (p *proxyPool) Check(proxy string) bool {
-	var rsp biliIpResp
-	proxyUrl, _ := url.Parse("http://" + proxy)
+	var rsp biliIPResp
+	proxyURL, _ := url.Parse("http://" + proxy)
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		Proxy:           http.ProxyURL(proxyUrl),
+		Proxy:           http.ProxyURL(proxyURL),
 	}, Timeout: 10 * time.Second}
 	resp, err := client.Get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo")
 	if err != nil {

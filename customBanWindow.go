@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// CustomBanProcess 自定义封禁结构体
 type CustomBanProcess struct {
 	localFilter  *Filter.BanWindowFilter
 	systemFilter *Filter.BanWindowFilter
@@ -17,18 +18,22 @@ type CustomBanProcess struct {
 
 	nowID int64
 }
+
+// SaveData 保存封禁数据
 type SaveData struct {
 	ID        uint                `gorm:"primaryKey"`
 	Data      DanmuCenter.BanData `gorm:"embedded"`
 	CreatedAt time.Time
 }
 
+// SystemBanData 保存系统封禁数据
 type SystemBanData struct {
 	ID        uint   `gorm:"primaryKey"`
 	Content   string `json:"content"`
 	CreatedAt time.Time
 }
 
+// Ban 处理封禁
 func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	log.Printf("%+v\n", banData)
 	process.localFilter.Add(banData.Content)
@@ -40,6 +45,7 @@ func (process *CustomBanProcess) Ban(banData *DanmuCenter.BanData) {
 	//go process.reporter(banData)
 }
 
+// RestoreLocalFilter 恢复本地过滤器
 func (process *CustomBanProcess) RestoreLocalFilter(limit int) {
 	saveDatas := make([]SaveData, 0)
 	err := process.db.Model(&SaveData{}).Where("reason = ?", "时间范围内近似发言过多").Order("created_at desc").Limit(limit).Find(&saveDatas).Error
@@ -52,6 +58,7 @@ func (process *CustomBanProcess) RestoreLocalFilter(limit int) {
 	}
 }
 
+// RestoreSystemFilter 恢复系统过滤器
 func (process *CustomBanProcess) RestoreSystemFilter(limit int) {
 	systemBanDatas := make([]SystemBanData, 0)
 	err := process.db.Model(&SystemBanData{}).Order("created_at desc").Limit(limit).Find(&systemBanDatas).Error
@@ -64,6 +71,7 @@ func (process *CustomBanProcess) RestoreSystemFilter(limit int) {
 	}
 }
 
+// UpdateSystemFilter 更新系统过滤器
 func (process *CustomBanProcess) UpdateSystemFilter() error {
 	queryData, err := queryBan(process.nowID)
 	if err != nil {
@@ -91,6 +99,7 @@ func (process *CustomBanProcess) UpdateSystemFilter() error {
 	return nil
 }
 
+// TimingUpdataSystemFilter 定时更新系统过滤器
 func (process *CustomBanProcess) TimingUpdataSystemFilter(d time.Duration) {
 	ticker := time.NewTicker(d)
 	for {
