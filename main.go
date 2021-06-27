@@ -45,7 +45,7 @@ func main() {
 	db.AutoMigrate(&SaveData{}, &SystemBanData{})
 
 	localBanWindowFilter := Filter.NewBanWindowFilter(100, 1800, 0.75, 10, true) //创建容量为100，窗口有效时间为3600秒，相似度要求为0.75的封禁窗口
-	systemBanWindowFilter := Filter.NewBanWindowFilter(100, -1, 0.75, -1, false) //-1为永久生效
+	systemBanWindowFilter := Filter.NewBanWindowFilter(200, -1, 0.75, -1, false) //-1为永久生效
 	banProcess := &CustomBanProcess{
 		db:           db,
 		localFilter:  localBanWindowFilter,
@@ -61,7 +61,7 @@ func main() {
 
 	center := DanmuCenter.NewDanmuCenter(&DanmuCenter.DanmuCenterConfig{
 		TimeRange:      16,
-		MonitorNumber:  800,
+		MonitorNumber:  1000,
 		SpecialFocusOn: []int{1370218}, //1237390
 		Silent:         true,
 	},
