@@ -67,17 +67,17 @@ func main() {
 	},
 		DanmuCenter.SetProxy(getProxy), // 设置代理
 		DanmuCenter.SetPreFilter( //入库前检测
-			Helper.Safe(Filter.NewLenFilter(8).Check),                                            // 简易长度过滤
-			Helper.Safe(Filter.NewAdminFilter().Check),                                           // 过滤掉房管
-			Helper.Break(Filter.NewHaveBeenBanFilter().Check),                                    // 过滤掉已被Ban的弹幕
-			Helper.Safe(Filter.NewHighReatWordFilter(0.5).Check),                                 // 单字符重复率>0.75视作正常弹幕
-			Helper.Safe(Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(2)).Check), // 过滤掉重复词压缩后长度小于9的弹幕
-			Helper.Ban(systemBanWindowFilter.MatchCheck),                                         // 匹配系统确认封禁记录
-			Helper.Continue(localBanWindowFilter.UnlockCheck),                                    // 移除高等级的窗口
-			Helper.Safe(Filter.NewUserLevelFilter(5).Check),                                      // 过滤掉用户等级>=5的
-			Helper.Safe(Filter.NewFansMedalFilter(3).Check),                                      // 过滤掉粉丝勋章等级>=3的
-			Helper.Safe(Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢", "欢迎", "点歌"}).Check),   // 关键词匹配过滤
-			Helper.Ban(localBanWindowFilter.MatchCheck),                                          // 与封禁窗口比较
+			Helper.Safe(Filter.NewLenFilter(8, Filter.SetSpecialLevelLenTarget(0, 6)).Check),                                            // 简易长度过滤
+			Helper.Safe(Filter.NewAdminFilter().Check),                                                                                  // 过滤掉房管
+			Helper.Break(Filter.NewHaveBeenBanFilter().Check),                                                                           // 过滤掉已被Ban的弹幕
+			Helper.Safe(Filter.NewHighReatWordFilter(0.5).Check),                                                                        // 单字符重复率>0.75视作正常弹幕
+			Helper.Safe(Filter.NewLenFilter(9, Filter.SetLenFilterCompressRepeatGroup(2), Filter.SetSpecialLevelLenTarget(0, 6)).Check), // 过滤掉重复词压缩后长度小于9的弹幕
+			Helper.Ban(systemBanWindowFilter.MatchCheck),                                                                                // 匹配系统确认封禁记录
+			Helper.Continue(localBanWindowFilter.UnlockCheck),                                                                           // 移除高等级的窗口
+			Helper.Safe(Filter.NewUserLevelFilter(5).Check),                                                                             // 过滤掉用户等级>=5的
+			Helper.Safe(Filter.NewFansMedalFilter(3).Check),                                                                             // 过滤掉粉丝勋章等级>=3的
+			Helper.Safe(Filter.NewKeyWordFilter([]string{"谢谢", "感谢", "多谢", "欢迎", "点歌"}).Check),                                          // 关键词匹配过滤
+			Helper.Ban(localBanWindowFilter.MatchCheck),                                                                                 // 与封禁窗口比较
 		),
 		DanmuCenter.SetAfterFilter( //入库后检测
 			Helper.Ban(Filter.NewHighSimilarityAndSpeedFilter(0.75, 3).Check), //时间范围内达到startCheck后检测最新几组的相似率

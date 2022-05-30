@@ -2,6 +2,7 @@
 /gorm.db
 .DS_Store
 .gitignore
+.idea
 /prepare
 
 env.toml
